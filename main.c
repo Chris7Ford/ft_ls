@@ -6,15 +6,12 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/21 10:43:19 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/21 17:54:30 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
 #include "libft/libft.h"
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include <stdio.h>
 
@@ -26,6 +23,16 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
 		i++;
 	return (!((n1->f_name)[i] < n2.f_name[i]));
+}
+
+int		sort_modified(t_f_node *n1, t_info n2)
+{
+	return (n1->last_modified.tv_sec < n2.last_modified.tv_sec);
+}
+
+int		do_not_sort(t_f_node *n1, t_info n2)
+{
+	return (0);
 }
 
 int		sort_alpha_node_rev(t_f_node *n1, t_info n2)
@@ -41,7 +48,6 @@ int		sort_alpha_node_rev(t_f_node *n1, t_info n2)
 void	print_filename(t_f_node *node)
 {
 	ft_putstr(node->f_name);
-	ft_putchar('\n');
 }
 
 t_f_node	*create_node(t_info info)
@@ -52,10 +58,15 @@ t_f_node	*create_node(t_info info)
 	node->f_name = info.f_name;
 	node->filetype = info.filetype;
 	node->permissions = info.permissions;
+	node->last_modified = info.last_modified;
 	node->hidden = info.hidden;
 	node->hlink = info.hlink;
+	node->size = info.size;
+	node->uid = info.uid;
+	node->gid = info.gid;
+	node->username = info.username;
+	node->groupname = info.groupname;
 	node->left = 0;
-	node->uid = info->uid;
 	node->right = 0;
 	return (node);
 }
@@ -232,6 +243,24 @@ void	print_file_type(t_f_node *current)
 		ft_putchar('-');
 	else if (current->filetype & DIRECTORY)
 		ft_putchar('d');
+	else if (current->filetype & SYMLINK)
+	{
+		ft_putchar('l');
+		current->is_link = 1;
+	}
+}
+
+void	print_link_file(t_f_node *node) //
+{
+	char	buffer[4097];
+	int		count;
+
+	count = readlink(node->f_name, buffer, sizeof(buffer));
+	if (count >= 0)
+	{
+		buffer[count] = '\0';
+//		ft_printf(" -> %s", buffer);
+	}
 }
 
 void	print_long_file_info(t_f_node *node) //
@@ -243,45 +272,68 @@ void	print_long_file_info(t_f_node *node) //
 		ft_putchar(' ');
 		print_filename(node);
 //		ft_printf("%4d", node->hlink);
+//		ft_printf("%s", node->username);
+//		ft_printf("%s", node->groupname);
+//		ft_printf("%d\n", node->size);
+//		if (node->is_link)
+//			print_link_file(node);
+		ft_putchar('\n');
 	}
 }
 
 void	fill_file_type(t_info *current, struct stat buf) //
 {
-	//This will have to be double checked because it says regular files and directories are something else if the order is different..
-	if (buf.st_mode & S_IFREG)
-//		printf("regular file\n");
-		current->filetype = REG;
-	else if (buf.st_mode & S_IFDIR)
-	//	printf("directory\n");
-		current->filetype = DIRECTORY;
-	else if (buf.st_mode & S_IFBLK)
-//		printf("block device\n");
+	if (S_ISBLK(buf.st_mode))
 		current->filetype = BLOCK_DEVICE;
-	else if (buf.st_mode & S_IFCHR)
-//		printf("character device");
+	else if (S_ISCHR(buf.st_mode))
 		current->filetype = CHARACTER_DEVICE;
-	else if (buf.st_mode & S_IFIFO)
-//		printf("FIFO/pipe\n");
+	else if (S_ISDIR(buf.st_mode))
+		current->filetype = DIRECTORY;
+	else if (S_ISFIFO(buf.st_mode))
 		current->filetype = FIFO;
-	else if (buf.st_mode & S_IFLNK)
-//		printf("symlink\n");
+	else if (S_ISREG(buf.st_mode))
+		current->filetype = REG;
+	else if (S_ISLNK(buf.st_mode))
 		current->filetype = SYMLINK;
-	else if (buf.st_mode & S_IFSOCK)
-//		printf("socket\n");
-		current->filetype = SOCK;
 }
 
 void	get_stat_info(t_info *current, char *f_name)
 {
 	struct stat		buf;
 
-	stat(f_name, &buf);
+	lstat(f_name, &buf);
 	fill_permissions(current, buf.st_mode);
 	fill_file_type(current, buf);
 	//These are being stored backwards, so I'll print backwards later..
 	current->hlink = buf.st_nlink;
+	current->size = buf.st_size;
 	current->uid = buf.st_uid;
+	current->gid = buf.st_gid;
+}
+
+void	get_owner_info(t_info *current) //
+{
+	struct passwd	*pwd;
+
+	pwd = getpwuid(current->uid);
+	current->username = ft_strdup(pwd->pw_name);
+}
+
+void	get_group_info(t_info *current) //
+{
+	struct group	*grp;
+
+	grp = getgrgid(current->gid);
+	current->groupname = ft_strdup(grp->gr_name);
+}
+
+void	get_sort_info(t_info *current)
+{
+	struct stat		buf;
+
+	lstat(current->f_name, &buf);
+	current->last_modified = buf.st_mtimespec;
+	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 }
 
 int		get_directory(char *directory_name, t_f_node **head)
@@ -296,9 +348,13 @@ int		get_directory(char *directory_name, t_f_node **head)
 	while ((file = readdir(directory)))
 	{
 		current.f_name = ft_strdup(file->d_name);
-		current.hidden = file->d_name[0] == '.' ? 1 : 0;
+		get_sort_info(&current);
 		get_stat_info(&current, current.f_name);
-		insert_node(head, current, sort_alpha_node);
+		get_owner_info(&current);
+		get_group_info(&current);
+//		insert_node(head, current, sort_alpha_node);
+	//	insert_node(head, current, do_not_sort);
+		insert_node(head, current, sort_modified);
 	//	ft_putendl(file->d_name);
 	}
 	(void)closedir(directory);
@@ -312,6 +368,8 @@ void	free_tree(t_f_node *head)
 	free_tree(head->right);
 	free_tree(head->left);
 	free(head->f_name);
+	free(head->username);
+	free(head->groupname);
 	free(head);
 }
 

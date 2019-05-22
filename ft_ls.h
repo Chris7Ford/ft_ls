@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/21 10:40:14 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/21 17:21:22 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 # define FT_LS_H
 
 # include <dirent.h>
+# include <stdlib.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <pwd.h>
+# include <grp.h>
+# include <time.h>
+# include <unistd.h>
 
 # define BLOCK_DEVICE 		1
 # define CHARACTER_DEVICE 	2
@@ -21,30 +28,41 @@
 # define FIFO				8
 # define SYMLINK			16
 # define REG				32
-# define SOCK				64
+//# define SOCK				64
 
 typedef struct s_f_node		t_f_node;
 struct						s_f_node
 {
+	struct timespec			last_modified;
 	struct s_f_node			*right;
 	struct s_f_node			*left;
 	unsigned int			filetype : 7;
-	char *					f_name;
+	char					*username;
+	char					*groupname;
+	char					*f_name;
 	int						permissions;
 	int						hidden : 1;
+	int						is_link : 1;
 	int						hlink;
+	int						size;
 	int						uid;
+	int						gid;
 };
 
 typedef struct s_info		t_info;
 struct						s_info
 {
+	struct timespec			last_modified;
 	unsigned int			filetype : 7;
-	char *					f_name;
+	char					*username;
+	char					*groupname;
+	char					*f_name;
 	int						permissions;
 	int						hidden : 1;
 	int						hlink;
+	int						size;
 	int						uid;
+	int						gid;
 };
 
 int							sort_alpha_node(t_f_node *n1, t_info n2);
