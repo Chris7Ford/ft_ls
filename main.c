@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/21 17:54:30 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/21 21:17:02 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 #include "libft/libft.h"
 
 #include <stdio.h>
+
+//const	t_sort_dispatch	sort_table[] = {
+//	{C, printc}
+//}
 
 int		sort_alpha_node(t_f_node *n1, t_info n2)
 {
@@ -27,6 +31,8 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 
 int		sort_modified(t_f_node *n1, t_info n2)
 {
+	if (n1->last_modified.tv_sec == n2.last_modified.tv_sec);
+		return (sort_alpha_node(n1, n2));
 	return (n1->last_modified.tv_sec < n2.last_modified.tv_sec);
 }
 
@@ -327,7 +333,7 @@ void	get_group_info(t_info *current) //
 	current->groupname = ft_strdup(grp->gr_name);
 }
 
-void	get_sort_info(t_info *current)
+void	get_sort_info(t_info *current) //
 {
 	struct stat		buf;
 
@@ -336,7 +342,7 @@ void	get_sort_info(t_info *current)
 	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 }
 
-int		get_directory(char *directory_name, t_f_node **head)
+int		get_directory(char *directory_name, t_f_node **head, t_input *input)
 {
 	struct dirent	*file;
 	t_info			current;
@@ -373,17 +379,75 @@ void	free_tree(t_f_node *head)
 	free(head);
 }
 
+void	add_flag(t_input *input, char c) //
+{
+	if (c == 'l')
+		input->flags = input->flags | L;
+	else if (c == 'R')
+		input->flags = input->flags | CR;
+	else if (c == 'a')
+		input->flags = input->flags | A;
+	else if (c == 'r')
+		input->flags = input->flags | R;
+	else if (c == 't')
+		input->flags = input->flags | T;
+	else if (c == 'u')
+		input->flags = input->flags | U;
+	else if (c == 'f')
+		input->flags = input->flags | F;
+	else if (c == 'g')
+		input->flags = input->flags | G;
+	else if (c == 'd')
+		input->flags = input->flags | D;
+	else
+	{
+		ft_putstr("usage: ft_ls [-Radfglrtu] [file ...]");
+		exit();
+	}
+}
+
+int		parse_flag(t_input *input, char *str) //
+{
+	int		i;
+
+	if (str[0] == '-')
+	{
+		i = 1;
+		while (str[i])
+			add_flag(input, str[i++]);
+		return (1);
+	}
+	return (0);
+}
+
+void	get_input_info(t_input *input, int argc, char **argv) //
+{
+	int		i;
+	int		j;
+
+	//f flag overwrites t.
+	i = 1;
+	while (i < argc && parse_flag(input, argv[i]))
+		i++;
+	j = 1;
+	input->directories = (char **)malloc(sizeof(char *) * (argc - i + 2));
+	(input->directories)[0] = ft_strdup(".");
+	while (i < argc)
+		(input->directories)[j++] = strdup(argv[i++]);
+	(input->directories)[j] = 0;
+}
+
 int		main(int argc, char **argv)
 {
-	t_f_node	*head;
+	t_input		input;
+	t_f_node		*head;
+
 	head = 0;
-	if (argc == 1)
-	{
-		get_directory(".", &head);
+	get_input_info(&input, argc, argv); 
+//		get_directory(".", &head);
 //		inorder_traversal_apply(head, print_filename); 
 //		inorder_traversal_apply(head, print_permissions); 
-		inorder_traversal_apply(head, print_long_file_info); 
-		free_tree(head);
-	}
+	inorder_traversal_apply(head, print_long_file_info, input); 
+	free_tree(head);
 	return (0);
 }
