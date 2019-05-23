@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/22 16:55:38 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/23 08:13:11 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,32 +77,20 @@ struct							s_info
 	int							gid;
 };
 
-/*typedef void (function typedef)
-
-static struct 	s_dispatch (why static?)
-{
-	int c,
-	functype
-}				t_dispatch[MAX_FUNCTIONS] = {
-	{'c', &funct},
-
-}
-*/
-
 typedef struct s_input			t_input;
 struct							s_input
 {
-	void						(*for_each_node)(t_f_node *elem, void (*f)(t_f_node *node));
-	void						(*file_print)(t_f_node *node);
+	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
+								(t_f_node *node, t_input input));
+	void						(*file_print)(t_f_node *node, t_input input);
 	char						**directories;
 	int							(*sort)(t_f_node *n1, t_info n2);
+	int							show_hidden : 1;
 	int							flags : 9;
 };
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);
-int								sort_alpha_node_rev(t_f_node *n1, t_info n2);
-void							print_filename_hidden(t_f_node *node);
-void							print_filename(t_f_node *node);
+void							print_filename(t_f_node *node, t_input input);
 t_f_node						*create_node(t_info info);
 void							traverse_nodes_to_get_length(t_f_node *node,
 								int current, int *max);
@@ -115,8 +103,8 @@ void							traverse_nodes_to_insert(t_f_node **orig,
 								t_info info, int (*cmp)(t_f_node*, t_info));
 void							insert_node(t_f_node **head,
 								t_info info, int (*cmp)(t_f_node*, t_info));
-void							inorder_traversal_apply(t_f_node *elem,
-								void (*f)(t_f_node*));
+void							inorder_traversal_apply(t_f_node *elem, t_input input,
+								void (*f)(t_f_node*, t_input));
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);

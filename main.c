@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/23 07:20:36 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/23 07:59:26 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include "libft/libft.h"
 
 #include <stdio.h>
-
-void print2D(t_f_node *root);
 
 int		sort_alpha_node(t_f_node *n1, t_info n2)
 {
@@ -39,9 +37,9 @@ int		do_not_sort(t_f_node *n1, t_info n2)
 	return (0);
 }
 
-void	print_filename(t_f_node *node)
+void	print_filename(t_f_node *node, t_input input)
 {
-	if (!(node->hidden))
+	if (input.show_hidden || !(node->hidden))
 	{
 		ft_putstr(node->f_name);
 		ft_putchar('\n');
@@ -189,22 +187,22 @@ void	insert_node(t_f_node **head, t_info info, int (*cmp)(t_f_node*, t_info))
 		traverse_nodes_to_insert(head, info, cmp);
 }
 
-void	inorder_traversal_apply(t_f_node *elem, void (*f)(t_f_node*))
+void	inorder_traversal_apply(t_f_node *elem, t_input input, void (*f)(t_f_node*, t_input))
 {
 	if (elem->left)
-		inorder_traversal_apply(elem->left, f);
-	f(elem);
+		inorder_traversal_apply(elem->left, input, f);
+	f(elem, input);
 	if (elem->right)
-		inorder_traversal_apply(elem->right, f);
+		inorder_traversal_apply(elem->right, input, f);
 }
 
-void	reverse_inorder_traversal_apply(t_f_node *elem, void (*f)(t_f_node*))
+void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, void (*f)(t_f_node*, t_input))
 {
 	if (elem->right)
-		reverse_inorder_traversal_apply(elem->right, f);
-	f(elem);
+		reverse_inorder_traversal_apply(elem->right, input, f);
+	f(elem, input);
 	if (elem->left)
-		reverse_inorder_traversal_apply(elem->left, f);
+		reverse_inorder_traversal_apply(elem->left, input, f);
 }
 
 void	fill_permissions(t_info *current, int st_mode)
@@ -270,18 +268,18 @@ void	print_link_file(t_f_node *node) //
 	}
 }
 
-void	print_long_file_info(t_f_node *node) //
+void	print_long_file_info(t_f_node *node, t_input input) //
 {
-	if (node->hidden == 0)
+	if (input.show_hidden || node->hidden == 0)
 	{
 		print_file_type(node);
 		print_permissions(node);
 		ft_putchar(' ');
-		print_filename(node);
 //		ft_printf("%4d", node->hlink);
 //		ft_printf("%s", node->username);
 //		ft_printf("%s", node->groupname);
 //		ft_printf("%d\n", node->size);
+		print_filename(node, input);
 //		if (node->is_link)
 //			print_link_file(node);
 		ft_putchar('\n');
@@ -367,7 +365,7 @@ int		get_directory(char *directory_name, t_input *input)
 	}
 	(void)closedir(directory);
 //	print2D(head);
-	input->for_each_node(head, input->file_print);
+	input->for_each_node(head, *input, input->file_print);
 	free_tree(head);
 	return (1);
 }
@@ -478,6 +476,12 @@ void	assign_print_function(t_input *input) //
 		input->file_print = print_filename;
 }
 
+void	parse_other_input(t_input *input)
+{
+	if (input->flags & A)
+		input->show_hidden = 1;
+}
+
 int		main(int argc, char **argv)
 {
 	t_input		input;
@@ -488,6 +492,7 @@ int		main(int argc, char **argv)
 	assign_sorting_function(&input);
 	assign_traversal_function(&input);
 	assign_print_function(&input);
+	parse_other_input(&input);
 	while ((input.directories)[i])
 	{
 		get_directory(input.directories[i++], &input);
