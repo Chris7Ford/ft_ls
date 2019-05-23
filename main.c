@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/21 21:17:02 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/23 07:20:36 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,7 @@
 
 #include <stdio.h>
 
-//const	t_sort_dispatch	sort_table[] = {
-//	{C, printc}
-//}
+void print2D(t_f_node *root);
 
 int		sort_alpha_node(t_f_node *n1, t_info n2)
 {
@@ -31,7 +29,7 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 
 int		sort_modified(t_f_node *n1, t_info n2)
 {
-	if (n1->last_modified.tv_sec == n2.last_modified.tv_sec);
+	if (n1->last_modified.tv_sec == n2.last_modified.tv_sec)
 		return (sort_alpha_node(n1, n2));
 	return (n1->last_modified.tv_sec < n2.last_modified.tv_sec);
 }
@@ -41,19 +39,13 @@ int		do_not_sort(t_f_node *n1, t_info n2)
 	return (0);
 }
 
-int		sort_alpha_node_rev(t_f_node *n1, t_info n2)
-{
-	int		i;
-
-	i = 0;
-	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
-		i++;
-	return ((n1->f_name)[i] < n2.f_name[i]);
-}
-
 void	print_filename(t_f_node *node)
 {
-	ft_putstr(node->f_name);
+	if (!(node->hidden))
+	{
+		ft_putstr(node->f_name);
+		ft_putchar('\n');
+	}
 }
 
 t_f_node	*create_node(t_info info)
@@ -206,6 +198,15 @@ void	inorder_traversal_apply(t_f_node *elem, void (*f)(t_f_node*))
 		inorder_traversal_apply(elem->right, f);
 }
 
+void	reverse_inorder_traversal_apply(t_f_node *elem, void (*f)(t_f_node*))
+{
+	if (elem->right)
+		reverse_inorder_traversal_apply(elem->right, f);
+	f(elem);
+	if (elem->left)
+		reverse_inorder_traversal_apply(elem->left, f);
+}
+
 void	fill_permissions(t_info *current, int st_mode)
 {
 	current->permissions = st_mode & 7;
@@ -310,7 +311,6 @@ void	get_stat_info(t_info *current, char *f_name)
 	lstat(f_name, &buf);
 	fill_permissions(current, buf.st_mode);
 	fill_file_type(current, buf);
-	//These are being stored backwards, so I'll print backwards later..
 	current->hlink = buf.st_nlink;
 	current->size = buf.st_size;
 	current->uid = buf.st_uid;
@@ -342,12 +342,14 @@ void	get_sort_info(t_info *current) //
 	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 }
 
-int		get_directory(char *directory_name, t_f_node **head, t_input *input)
+int		get_directory(char *directory_name, t_input *input)
 {
 	struct dirent	*file;
+	t_f_node		*head;
 	t_info			current;
 	DIR				*directory;
 
+	head = 0;
 	directory = opendir(directory_name);
 	if (!directory && printf("No such file"))
 		return (0);
@@ -358,12 +360,15 @@ int		get_directory(char *directory_name, t_f_node **head, t_input *input)
 		get_stat_info(&current, current.f_name);
 		get_owner_info(&current);
 		get_group_info(&current);
-//		insert_node(head, current, sort_alpha_node);
-	//	insert_node(head, current, do_not_sort);
-		insert_node(head, current, sort_modified);
+//		insert_node(&head, current, sort_alpha_node);
+	//	insert_node(&head, current, do_not_sort);
+		insert_node(&head, current, input->sort);
 	//	ft_putendl(file->d_name);
 	}
 	(void)closedir(directory);
+//	print2D(head);
+	input->for_each_node(head, input->file_print);
+	free_tree(head);
 	return (1);
 }
 
@@ -401,8 +406,8 @@ void	add_flag(t_input *input, char c) //
 		input->flags = input->flags | D;
 	else
 	{
-		ft_putstr("usage: ft_ls [-Radfglrtu] [file ...]");
-		exit();
+		ft_putstr("usage: ft_ls [-Radfglrtu] [file ...]\n");
+		exit(0);
 	}
 }
 
@@ -420,6 +425,14 @@ int		parse_flag(t_input *input, char *str) //
 	return (0);
 }
 
+void	overwrite_flags(t_input *input) //
+{
+	if (input->flags & F && input->flags & T)
+		input->flags -= T;
+	if (input->flags & F)
+		input->flags |= A;
+}
+
 void	get_input_info(t_input *input, int argc, char **argv) //
 {
 	int		i;
@@ -429,6 +442,7 @@ void	get_input_info(t_input *input, int argc, char **argv) //
 	i = 1;
 	while (i < argc && parse_flag(input, argv[i]))
 		i++;
+	overwrite_flags(input);
 	j = 1;
 	input->directories = (char **)malloc(sizeof(char *) * (argc - i + 2));
 	(input->directories)[0] = ft_strdup(".");
@@ -437,17 +451,51 @@ void	get_input_info(t_input *input, int argc, char **argv) //
 	(input->directories)[j] = 0;
 }
 
+void	assign_traversal_function(t_input *input) //
+{
+	if (input->flags & R)
+		input->for_each_node = &reverse_inorder_traversal_apply;
+	else
+		input->for_each_node = &inorder_traversal_apply;
+}
+
+void	assign_sorting_function(t_input *input) //
+{
+	if (input->flags & T)
+		input->sort = sort_modified;
+	else if (input->flags & F)
+		input->sort = do_not_sort;
+	else
+		input->sort = sort_alpha_node;
+}
+
+void	assign_print_function(t_input *input) //
+{
+	//all possible printing options are..... long and short. Thats it so far...
+	if (input->flags & L)
+		input->file_print = print_long_file_info;
+	else
+		input->file_print = print_filename;
+}
+
 int		main(int argc, char **argv)
 {
 	t_input		input;
-	t_f_node		*head;
+	int			i;
 
-	head = 0;
-	get_input_info(&input, argc, argv); 
-//		get_directory(".", &head);
+	get_input_info(&input, argc, argv);
+	i = 0;
+	assign_sorting_function(&input);
+	assign_traversal_function(&input);
+	assign_print_function(&input);
+	while ((input.directories)[i])
+	{
+		get_directory(input.directories[i++], &input);
+		free(input.directories[i]);
+	}
+	free(input.directories);
+//		get_directory(".", &input);
 //		inorder_traversal_apply(head, print_filename); 
 //		inorder_traversal_apply(head, print_permissions); 
-	inorder_traversal_apply(head, print_long_file_info, input); 
-	free_tree(head);
 	return (0);
 }

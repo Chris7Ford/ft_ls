@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/21 21:08:05 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/22 16:55:38 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,9 @@
 # define F						64
 # define G						128
 # define D						256
+# define ALPHA					1
+# define LAST_MOD				2
+# define DO_NOT_SORT			4
 
 typedef struct s_f_node			t_f_node;
 struct							s_f_node
@@ -74,19 +77,27 @@ struct							s_info
 	int							gid;
 };
 
-typedef struct s_sort_dispatch	t_sort_dispatch;
-struct							s_sort_dispatch
+/*typedef void (function typedef)
+
+static struct 	s_dispatch (why static?)
 {
-	int							c;
-	int							(*function)(t_f_node *n1, t_info n2);
+	int c,
+	functype
+}				t_dispatch[MAX_FUNCTIONS] = {
+	{'c', &funct},
+
 }
+*/
 
 typedef struct s_input			t_input;
 struct							s_input
 {
+	void						(*for_each_node)(t_f_node *elem, void (*f)(t_f_node *node));
+	void						(*file_print)(t_f_node *node);
 	char						**directories;
+	int							(*sort)(t_f_node *n1, t_info n2);
 	int							flags : 9;
-}
+};
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);
 int								sort_alpha_node_rev(t_f_node *n1, t_info n2);
@@ -111,7 +122,7 @@ void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
 void							get_stat_info(t_info *current, char *f_name);
 int								get_directory(char *directory_name,
-								t_f_node **head, t_input *input);
+								t_input *input);
 void							free_tree(t_f_node *head);
 int								main(int argc, char **argv);
 #endif
