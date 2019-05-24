@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/23 18:52:38 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/24 07:23:16 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,18 @@ struct							s_info
 	int							gid;
 };
 
+typedef struct s_q_link			t_q_link;
+struct							s_q_link
+{
+	t_q_link					*next;
+	t_info						info;
+	char						*directory;
+};
+
 typedef struct s_input			t_input;
 struct							s_input
 {
+	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
 								(t_f_node *node, t_input input));
 	void						(*file_print)(t_f_node *node, t_input input);
@@ -88,14 +97,6 @@ struct							s_input
 	int							show_hidden : 1;
 	int							recurse : 1;
 	int							flags : 9;
-};
-
-typedef struct s_q_link			t_q_link;
-struct							s_q_link
-{
-	t_q_link					*next;
-	t_info						info;
-	char						*directory;
 };
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);

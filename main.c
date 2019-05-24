@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/23 19:11:03 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/24 07:52:57 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,6 +368,29 @@ void		push_queue(char *name, t_q_link **head, t_info current)
 	link->next = create_link(name, current);
 }
 
+t_q_link		*pop_queue(t_q_link **head)
+{
+	t_q_link	*temp;
+
+	temp = *head;
+	if (!(temp->next))
+	{
+		temp = *head;
+		*head = 0;
+	}
+	else if (!(temp->next->next))
+	{
+		temp = temp->next;
+		(*head)->next = 0;
+	}
+	else
+	{
+		while (temp->next->next)
+			temp = temp->next;
+	}
+	return (temp);
+}
+
 t_q_link		*unshift_queue(t_q_link **head)
 {
 	t_q_link	*temp;
@@ -425,6 +448,14 @@ char		*file_to_path(char *path, char *file)
 	return (temp);
 }
 
+void			fill_dequeue_function(t_input *input)
+{
+	if (input->flags & R)
+		input->dequeue = pop_queue;
+	else
+		input->dequeue = unshift_queue;
+}
+
 int			get_directory(char *directory_name, t_input *input, t_info current)
 {
 	struct dirent	*file;
@@ -463,9 +494,10 @@ int			get_directory(char *directory_name, t_input *input, t_info current)
 	}
 	(void)closedir(directory);
 	input->for_each_node(head, *input, input->file_print);
+	fill_dequeue_function(input);
 	while (input->flags & CR && queue)
 	{
-		tmp = unshift_queue(&queue);
+		tmp = input->dequeue(&queue);
 		tmp->directory = file_to_path(directory_name, tmp->directory);
 		ft_putstr(tmp->directory);
 		ft_putstr(":\n\n");
@@ -601,8 +633,5 @@ int		main(int argc, char **argv)
 		free(input.directories[i++]);
 	}
 	free(input.directories);
-//		get_directory(".", &input);
-//		inorder_traversal_apply(head, print_filename); 
-//		inorder_traversal_apply(head, print_permissions); 
 	return (0);
 }
