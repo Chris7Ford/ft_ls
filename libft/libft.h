@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/11 18:04:30 by chford            #+#    #+#             */
-/*   Updated: 2019/05/09 10:20:48 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/23 15:34:12 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,4 +92,6 @@ void	*ft_memset(void *b, int c, size_t len);
 void	print_hex_ulong_length(unsigned long n, int *length);
 void	print_hex_ulong_fd(unsigned long n, int fd);
 void	ft_putstr_constrain_fd(char const *s, int constrain, int fd);
+char	*ft_strjoin_free(char **s1, char **s2, int free1, int free2);
+char	*ft_strjoin_char(char **s1, char c);
 #endif

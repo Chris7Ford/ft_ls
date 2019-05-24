@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/23 08:13:11 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/23 18:52:38 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,16 @@ struct							s_input
 	char						**directories;
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
+	int							recurse : 1;
 	int							flags : 9;
+};
+
+typedef struct s_q_link			t_q_link;
+struct							s_q_link
+{
+	t_q_link					*next;
+	t_info						info;
+	char						*directory;
 };
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);
@@ -108,9 +117,9 @@ void							inorder_traversal_apply(t_f_node *elem, t_input input,
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
-void							get_stat_info(t_info *current, char *f_name);
+int								get_stat_info(t_info *current, char *f_name);
 int								get_directory(char *directory_name,
-								t_input *input);
+								t_input *input, t_info current);
 void							free_tree(t_f_node *head);
 int								main(int argc, char **argv);
 #endif
