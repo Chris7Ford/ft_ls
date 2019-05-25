@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/24 07:52:57 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/24 17:21:53 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,6 +371,7 @@ void		push_queue(char *name, t_q_link **head, t_info current)
 t_q_link		*pop_queue(t_q_link **head)
 {
 	t_q_link	*temp;
+	t_q_link	*other_temp;
 
 	temp = *head;
 	if (!(temp->next))
@@ -378,7 +379,7 @@ t_q_link		*pop_queue(t_q_link **head)
 		temp = *head;
 		*head = 0;
 	}
-	else if (!(temp->next->next))
+	else if (temp->next->next == 0)
 	{
 		temp = temp->next;
 		(*head)->next = 0;
@@ -387,6 +388,9 @@ t_q_link		*pop_queue(t_q_link **head)
 	{
 		while (temp->next->next)
 			temp = temp->next;
+		other_temp = temp;
+		temp = temp->next;
+		other_temp->next = 0;
 	}
 	return (temp);
 }
@@ -622,11 +626,14 @@ int		main(int argc, char **argv)
 	t_info		current;
 	int			i;
 
+	//gcc main.c libft/libft.a -g -fsanitize=address
+	//./a.out -Rra gives segfault
 	get_input_info(&input, argc, argv);
 	i = 0;
 	assign_sorting_function(&input);
 	assign_traversal_function(&input);
 	assign_print_function(&input);
+	input.show_hidden = input.flags & A ? 1 : 0;
 	while ((input.directories)[i])
 	{
 		get_directory(input.directories[i], &input, current);
