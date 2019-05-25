@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/24 17:21:53 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/25 12:50:53 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,28 @@ void	print_filename(t_f_node *node, t_input input)
 		ft_putstr(node->f_name);
 		ft_putchar('\n');
 	}
+}
+
+char		*file_to_path(char *path, char *file)
+{
+	char	*temp;
+	char	*temp2;
+	int		len;
+
+	len = ft_strlen(path);
+	if (path[len - 1] != '/')
+	{
+		temp2 = ft_strdup(path);
+		temp2 = ft_strjoin_char(&temp2, '/');
+		temp = ft_strjoin(temp2, file);
+		free(temp2);
+	}
+	else
+	{
+		temp = ft_strjoin(path, file);
+	}
+//	free(file);
+	return (temp);
 }
 
 t_f_node	*create_node(t_info info)
@@ -302,14 +324,17 @@ void	fill_file_type(t_info *current, struct stat buf) //
 		current->filetype = SYMLINK;
 }
 
-int		get_stat_info(t_info *current, char *f_name)
+int		get_stat_info(t_info *current, char *f_name, char *path)
 {
 	struct stat		buf;
+	char			*temp;
 
 	if (lstat(f_name, &buf) == -1)
-		return (0);
+	{
+		temp = file_to_path(path, current->f_name);
+		lstat(temp, &buf);
+	}
 	fill_permissions(current, buf.st_mode);
-	fill_file_type(current, buf);
 	current->hlink = buf.st_nlink;
 	current->size = buf.st_size;
 	current->uid = buf.st_uid;
@@ -333,13 +358,21 @@ void	get_group_info(t_info *current) //
 	current->groupname = ft_strdup(grp->gr_name);
 }
 
-void	get_sort_info(t_info *current) //
+int		get_sort_info(t_info *current, char *path) //
 {
 	struct stat		buf;
+	char			*temp;
 
-	lstat(current->f_name, &buf);
+	if (lstat(current->f_name, &buf) == -1)
+	{
+		temp = file_to_path(path, current->f_name);
+		lstat(temp, &buf);
+		free(temp);
+	}
+	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->hidden = current->f_name[0] == '.' ? 1 : 0;
+	return (1);
 }
 
 t_q_link	*create_link(char *str, t_info current)
@@ -430,28 +463,6 @@ void		reset_t_info(t_info *current)
  	current->gid = 0;
 }
 
-char		*file_to_path(char *path, char *file)
-{
-	char	*temp;
-	char	*temp2;
-	int		len;
-
-	len = ft_strlen(path);
-	if (path[len - 1] != '/')
-	{
-		temp2 = ft_strdup(path);
-		temp2 = ft_strjoin_char(&temp2, '/');
-		temp = ft_strjoin(temp2, file);
-		free(temp2);
-	}
-	else
-	{
-		temp = ft_strjoin(path, file);
-	}
-//	free(file);
-	return (temp);
-}
-
 void			fill_dequeue_function(t_input *input)
 {
 	if (input->flags & R)
@@ -474,24 +485,22 @@ int			get_directory(char *directory_name, t_input *input, t_info current)
 	directory = opendir(directory_name);
 	if (!directory)
 	{
-		ft_putstr("No such directory\n");
+//		ft_putstr("No such directory\n");
+		perror("ft_ls: ");
 		return (0);
 	}
 	while ((file = readdir(directory)))
 	{
 		reset_t_info(&current);
 		current.f_name = ft_strdup(file->d_name);
-		get_sort_info(&current);
-		if (get_stat_info(&current, current.f_name) == 0)
+		get_sort_info(&current, directory_name);
+		if (input->flags & L)
 		{
-			temp = file_to_path(directory_name, current.f_name);
-			get_stat_info(&current, temp);
+			get_stat_info(&current, current.f_name, directory_name);
+//			get_owner_info(&current);
+//			get_group_info(&current);
+//			free(temp);
 		}
-	//	get_stat_info(&current, directory_name);
-//		get_stat_info(&current, current.f_name);
-//		get_owner_info(&current);
-//		get_group_info(&current);
-//		free(temp);
 		insert_node(&head, current, input->sort);
 		if (input->flags & CR && current.filetype & DIRECTORY && recurse_me(file->d_name, *input))
 			push_queue(file->d_name, &queue, current);
@@ -504,12 +513,12 @@ int			get_directory(char *directory_name, t_input *input, t_info current)
 		tmp = input->dequeue(&queue);
 		tmp->directory = file_to_path(directory_name, tmp->directory);
 		ft_putstr(tmp->directory);
-		ft_putstr(":\n\n");
+		ft_putstr(":\n");
 		get_directory(tmp->directory, input, tmp->info);
 		free(tmp->directory);
 		free(tmp);
-		ft_putstr("\n\n\n\n");
 	}
+	ft_putstr("\n");
 	free_tree(head);
 	return (1);
 }
@@ -585,11 +594,20 @@ void	get_input_info(t_input *input, int argc, char **argv) //
 	while (i < argc && parse_flag(input, argv[i]))
 		i++;
 	overwrite_flags(input);
-	j = 1;
-	input->directories = (char **)malloc(sizeof(char *) * (argc - i + 2));
-	(input->directories)[0] = ft_strdup(".");
-	while (i < argc)
-		(input->directories)[j++] = strdup(argv[i++]);
+	j = 0;
+	if (i < argc)
+	{
+		input->directories = (char **)malloc(sizeof(char *) * (argc - i + 1));
+		while (i < argc)
+		{
+			input->directories[j++] = ft_strdup(argv[i++]);
+		}
+	}
+	else
+	{
+		input->directories = (char **)malloc(sizeof(char *) * (2));
+		input->directories[j++] = ft_strdup(".");
+	}
 	(input->directories)[j] = 0;
 }
 
@@ -620,14 +638,20 @@ void	assign_print_function(t_input *input) //
 		input->file_print = print_filename;
 }
 
+int		is_directory(char *path)
+{
+	struct stat	details;
+
+	stat(path, &details);
+	return (S_ISDIR(details.st_mode));
+}
+
 int		main(int argc, char **argv)
 {
 	t_input		input;
 	t_info		current;
 	int			i;
 
-	//gcc main.c libft/libft.a -g -fsanitize=address
-	//./a.out -Rra gives segfault
 	get_input_info(&input, argc, argv);
 	i = 0;
 	assign_sorting_function(&input);
@@ -636,7 +660,10 @@ int		main(int argc, char **argv)
 	input.show_hidden = input.flags & A ? 1 : 0;
 	while ((input.directories)[i])
 	{
-		get_directory(input.directories[i], &input, current);
+		if (is_directory(input.directories[i]))
+			get_directory(input.directories[i], &input, current);
+		else
+			ft_putendl(input.directories[i]);
 		free(input.directories[i++]);
 	}
 	free(input.directories);

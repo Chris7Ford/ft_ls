@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/24 07:23:16 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/25 12:52:32 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void							inorder_traversal_apply(t_f_node *elem, t_input input,
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
-int								get_stat_info(t_info *current, char *f_name);
+int								get_stat_info(t_info *current, char *f_name, char *path);
 int								get_directory(char *directory_name,
 								t_input *input, t_info current);
 void							free_tree(t_f_node *head);
