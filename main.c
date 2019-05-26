@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/25 12:50:53 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/25 17:22:01 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -471,53 +471,66 @@ void			fill_dequeue_function(t_input *input)
 		input->dequeue = unshift_queue;
 }
 
+void		get_long_info(t_info *current, char *directory_name)
+{
+			get_stat_info(current, current->f_name, directory_name);
+//			get_owner_info(&current);
+//			get_group_info(&current);
+}
+
+int			throw_err(void)
+{
+	perror("ft_ls: ");
+	return (0);
+}
+
+void		get_file_info(t_info *current, t_input *input,
+		struct dirent *file, char * directory_name)
+{
+	reset_t_info(current);
+	current->f_name = ft_strdup(file->d_name);
+	get_sort_info(current, directory_name);
+	if (input->flags & L)
+		get_long_info(current, directory_name);
+}
+
+void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
+{
+	t_q_link		*tmp;
+
+	tmp = input->dequeue(queue);
+	tmp->directory = file_to_path(directory_name, tmp->directory);
+	ft_putstr(tmp->directory);
+	ft_putstr(":\n");
+	get_directory(tmp->directory, input, tmp->info);
+
+	free(tmp->directory);
+	free(tmp);
+}
+
 int			get_directory(char *directory_name, t_input *input, t_info current)
 {
 	struct dirent	*file;
 	t_f_node		*head;
 	t_q_link		*queue;
-	t_q_link		*tmp;
-	char			*temp;
 	DIR				*directory;
 
 	head = 0;
 	queue = 0;
 	directory = opendir(directory_name);
 	if (!directory)
-	{
-//		ft_putstr("No such directory\n");
-		perror("ft_ls: ");
-		return (0);
-	}
+		return (throw_err());
 	while ((file = readdir(directory)))
 	{
-		reset_t_info(&current);
-		current.f_name = ft_strdup(file->d_name);
-		get_sort_info(&current, directory_name);
-		if (input->flags & L)
-		{
-			get_stat_info(&current, current.f_name, directory_name);
-//			get_owner_info(&current);
-//			get_group_info(&current);
-//			free(temp);
-		}
+		get_file_info(&current, input, file, directory_name);
 		insert_node(&head, current, input->sort);
 		if (input->flags & CR && current.filetype & DIRECTORY && recurse_me(file->d_name, *input))
 			push_queue(file->d_name, &queue, current);
 	}
 	(void)closedir(directory);
 	input->for_each_node(head, *input, input->file_print);
-	fill_dequeue_function(input);
 	while (input->flags & CR && queue)
-	{
-		tmp = input->dequeue(&queue);
-		tmp->directory = file_to_path(directory_name, tmp->directory);
-		ft_putstr(tmp->directory);
-		ft_putstr(":\n");
-		get_directory(tmp->directory, input, tmp->info);
-		free(tmp->directory);
-		free(tmp);
-	}
+		handle_queue(&queue, directory_name, input);
 	ft_putstr("\n");
 	free_tree(head);
 	return (1);
@@ -646,6 +659,20 @@ int		is_directory(char *path)
 	return (S_ISDIR(details.st_mode));
 }
 
+void	print_single_file(char *path, t_input input)
+{
+	if (input.flags & L)
+	{
+		//Here, we need to see if this file exists and get all of its information.
+		ft_putendl("Do more stuff");
+	}
+	else
+	{
+		//check if this file exists.  If not, throw error.
+		ft_putendl(path);
+	}
+}
+
 int		main(int argc, char **argv)
 {
 	t_input		input;
@@ -658,12 +685,13 @@ int		main(int argc, char **argv)
 	assign_traversal_function(&input);
 	assign_print_function(&input);
 	input.show_hidden = input.flags & A ? 1 : 0;
+	fill_dequeue_function(&input);
 	while ((input.directories)[i])
 	{
 		if (is_directory(input.directories[i]))
 			get_directory(input.directories[i], &input, current);
 		else
-			ft_putendl(input.directories[i]);
+			print_single_file(input.directories[i], input);
 		free(input.directories[i++]);
 	}
 	free(input.directories);
