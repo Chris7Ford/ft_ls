@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/25 17:22:01 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/26 10:05:07 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	print_filename(t_f_node *node, t_input input)
 {
 	if (input.show_hidden || !(node->hidden))
 	{
-		ft_putstr(node->f_name);
+		write(1, node->f_name, ft_strlen(node->f_name));
 		ft_putchar('\n');
 	}
 }
@@ -304,7 +304,6 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 		print_filename(node, input);
 //		if (node->is_link)
 //			print_link_file(node);
-		ft_putchar('\n');
 	}
 }
 
@@ -332,7 +331,8 @@ int		get_stat_info(t_info *current, char *f_name, char *path)
 	if (lstat(f_name, &buf) == -1)
 	{
 		temp = file_to_path(path, current->f_name);
-		lstat(temp, &buf);
+		if (lstat(temp, &buf) == -1)
+			return (0);
 	}
 	fill_permissions(current, buf.st_mode);
 	current->hlink = buf.st_nlink;
@@ -485,7 +485,7 @@ int			throw_err(void)
 }
 
 void		get_file_info(t_info *current, t_input *input,
-		struct dirent *file, char * directory_name)
+		struct dirent *file, char *directory_name)
 {
 	reset_t_info(current);
 	current->f_name = ft_strdup(file->d_name);
@@ -500,10 +500,10 @@ void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 
 	tmp = input->dequeue(queue);
 	tmp->directory = file_to_path(directory_name, tmp->directory);
-	ft_putstr(tmp->directory);
-	ft_putstr(":\n");
+	write(1, "\n", 1);
+	write(1, tmp->directory, ft_strlen(tmp->directory));
+	write(1, ":\n", 2);
 	get_directory(tmp->directory, input, tmp->info);
-
 	free(tmp->directory);
 	free(tmp);
 }
@@ -531,7 +531,6 @@ int			get_directory(char *directory_name, t_input *input, t_info current)
 	input->for_each_node(head, *input, input->file_print);
 	while (input->flags & CR && queue)
 		handle_queue(&queue, directory_name, input);
-	ft_putstr("\n");
 	free_tree(head);
 	return (1);
 }
@@ -659,18 +658,41 @@ int		is_directory(char *path)
 	return (S_ISDIR(details.st_mode));
 }
 
+/*void		get_file_info(t_info *current, t_input *input,
+		struct dirent *file, char * directory_name)
+{
+	reset_t_info(current);
+	current->f_name = ft_strdup(file->d_name);
+	get_sort_info(current, directory_name);
+	if (input->flags & L)
+		get_long_info(current, directory_name);
+}*/
+
+//	../../PHP/day02/ex01/one_more_time.php
+
 void	print_single_file(char *path, t_input input)
 {
-	if (input.flags & L)
+	struct stat	details;
+	t_f_node	*head;
+	t_info		current;
+
+	if (stat(path, &details) == -1)
+		throw_err();
+	else if (input.flags & L)
 	{
 		//Here, we need to see if this file exists and get all of its information.
+		head = 0;
 		ft_putendl("Do more stuff");
+		current.f_name = ft_strdup(path);
+		get_stat_info(&current, path, "00");
+		get_owner_info(&current);
+		get_group_info(&current);
+		insert_node(&head, current, input.sort);
+		input.for_each_node(head, input, input.file_print);
+		free_tree(head);
 	}
 	else
-	{
-		//check if this file exists.  If not, throw error.
 		ft_putendl(path);
-	}
 }
 
 int		main(int argc, char **argv)
