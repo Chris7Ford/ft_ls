@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/26 10:05:07 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 15:51:33 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,14 @@ void	print_filename(t_f_node *node, t_input input)
 		write(1, node->f_name, ft_strlen(node->f_name));
 		ft_putchar('\n');
 	}
+}
+
+int		is_directory(char *path)
+{
+	struct stat	details;
+
+	stat(path, &details);
+	return (S_ISDIR(details.st_mode));
 }
 
 char		*file_to_path(char *path, char *file)
@@ -302,8 +310,8 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 //		ft_printf("%s", node->groupname);
 //		ft_printf("%d\n", node->size);
 		print_filename(node, input);
-//		if (node->is_link)
-//			print_link_file(node);
+		if (node->is_link)
+			print_link_file(node);
 	}
 }
 
@@ -500,15 +508,12 @@ void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 
 	tmp = input->dequeue(queue);
 	tmp->directory = file_to_path(directory_name, tmp->directory);
-	write(1, "\n", 1);
-	write(1, tmp->directory, ft_strlen(tmp->directory));
-	write(1, ":\n", 2);
-	get_directory(tmp->directory, input, tmp->info);
+	get_directory(tmp->directory, input, tmp->info, 0);
 	free(tmp->directory);
 	free(tmp);
 }
 
-int			get_directory(char *directory_name, t_input *input, t_info current)
+int			get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
 	t_f_node		*head;
@@ -520,6 +525,12 @@ int			get_directory(char *directory_name, t_input *input, t_info current)
 	directory = opendir(directory_name);
 	if (!directory)
 		return (throw_err());
+	if (!first)
+	{
+		write(1, "\n", 1);
+		write(1, directory_name, ft_strlen(directory_name));
+		write(1, ":\n", 2);
+	}
 	while ((file = readdir(directory)))
 	{
 		get_file_info(&current, input, file, directory_name);
@@ -596,31 +607,165 @@ void	overwrite_flags(t_input *input) //
 		input->flags |= A;
 }
 
-void	get_input_info(t_input *input, int argc, char **argv) //
+t_in_file	*create_in_file_node(char *path, int is_dir)
+{
+	t_in_file	*elem;
+
+	elem = malloc(sizeof(t_in_file));
+	elem->path = ft_strdup(path);
+	elem->is_directory = is_dir;
+	elem->next = 0;
+	return (elem);
+}
+
+void	push_input_file(t_in_file **head, char *path, int is_dir)
+{
+	t_in_file	*temp;
+
+	temp = *head;
+	if (!temp)
+		*head = create_in_file_node(path, is_dir);
+	else
+	{
+		while (temp->next)
+			temp = temp->next;
+		temp->next = create_in_file_node(path, is_dir);
+	}
+}
+
+int			sort_alpha(char *str1, char *str2)
 {
 	int		i;
-	int		j;
+	
+	i = 0;
+	while (str1[i] == str2[i] && str1[i] != '\0')
+		i++;
+	return (str1[i] > str2[i]);
+}
+
+int			files_first_alpha(t_in_file *n1, t_in_file *n2)
+{
+	//returning one if I want the second one first for now..
+	if (n1->is_directory)
+	{
+		if (n2->is_directory)
+			return (sort_alpha(n1->path, n2->path));
+		else
+			return (1);
+	}
+	if (n2->is_directory)
+		return (0);
+	else
+		return (sort_alpha(n1->path, n2->path));
+}
+
+void	swap_head(t_in_file **head)
+{
+	t_in_file	*elem;
+	t_in_file	*temp;
+
+	*head = elem->next;
+	temp = (*head)->next;
+	(*head)->next = elem;
+	elem->next = temp;
+	elem = *head;
+}
+
+int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
+{
+	t_in_file	*other_temp;
+	t_in_file	*temp;
+	t_in_file	*elem;
+	int			complete;
+	int			result;
+
+	complete = 0;
+	result = 1;
+	elem = *head;
+	while (!complete)
+	{
+		complete = 1;
+		if (f(*head, (*head)->next))
+			swap_head(head);
+		while (elem->next->next)
+		{
+			if (is_directory(elem->path) || is_directory(elem->next->path))
+				result = 0;
+			if (f(elem->next, elem->next->next))
+			{
+				complete = 0;
+				temp = elem->next->next->next;
+				other_temp = elem->next;
+				elem->next = elem->next->next;
+				elem->next->next = other_temp;
+				elem->next->next->next = temp;
+			}
+			elem = elem->next;
+		}
+		elem = *head;
+		if (is_directory(elem->next->path))
+			result = 0;
+	}
+	return (result);
+}
+
+int		sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
+{
+	t_in_file	*elem;
+	t_in_file	*temp;
+
+	if (*head == 0 || (*head)->next == 0)
+		return (1);
+	elem = *head;
+	if (f(elem, elem->next))
+		swap_head(head);
+/*	while (!complete)
+	{
+		if (is_directory(elem->path) || is_directory(elem->next->path))
+			result = 0;
+		complete = 1;
+		while (elem->next->next)
+		{
+			if (f(elem->next, elem->next->next))
+			{
+				printf("sorting\n");
+				if (is_directory(elem->path))
+					result = 0;
+				complete = 0;
+				other_temp = elem->next->next->next;
+				temp = elem->next;
+				elem->next = elem->next->next;
+				elem->next->next = temp;
+				elem->next->next = other_temp;
+			}
+			elem = elem->next;
+		}
+		if (is_directory(elem->next->path))
+			result = 0;
+	}
+*/	return (bubble_sort_input(head, f));
+}
+
+void		get_input_info(t_input *input, int argc, char **argv) //
+{
+	int			i;
 
 	//f flag overwrites t.
 	i = 1;
 	while (i < argc && parse_flag(input, argv[i]))
 		i++;
 	overwrite_flags(input);
-	j = 0;
+	input->directories = 0;
 	if (i < argc)
 	{
-		input->directories = (char **)malloc(sizeof(char *) * (argc - i + 1));
 		while (i < argc)
 		{
-			input->directories[j++] = ft_strdup(argv[i++]);
+			push_input_file(&(input->directories), argv[i], is_directory(argv[i]));
+			i++;
 		}
 	}
 	else
-	{
-		input->directories = (char **)malloc(sizeof(char *) * (2));
-		input->directories[j++] = ft_strdup(".");
-	}
-	(input->directories)[j] = 0;
+		push_input_file(&(input->directories), ".", 1);
 }
 
 void	assign_traversal_function(t_input *input) //
@@ -650,14 +795,6 @@ void	assign_print_function(t_input *input) //
 		input->file_print = print_filename;
 }
 
-int		is_directory(char *path)
-{
-	struct stat	details;
-
-	stat(path, &details);
-	return (S_ISDIR(details.st_mode));
-}
-
 /*void		get_file_info(t_info *current, t_input *input,
 		struct dirent *file, char * directory_name)
 {
@@ -682,8 +819,8 @@ void	print_single_file(char *path, t_input input)
 	{
 		//Here, we need to see if this file exists and get all of its information.
 		head = 0;
-		ft_putendl("Do more stuff");
 		current.f_name = ft_strdup(path);
+		get_sort_info(&current, path);
 		get_stat_info(&current, path, "00");
 		get_owner_info(&current);
 		get_group_info(&current);
@@ -695,10 +832,20 @@ void	print_single_file(char *path, t_input input)
 		ft_putendl(path);
 }
 
+void	free_input(t_in_file *file)
+{
+	if (file->next)
+		free_input(file->next);
+	free(file->path);
+	free(file);
+}
+
 int		main(int argc, char **argv)
 {
+	t_in_file	*elem;
 	t_input		input;
 	t_info		current;
+	int			result;
 	int			i;
 
 	get_input_info(&input, argc, argv);
@@ -708,14 +855,18 @@ int		main(int argc, char **argv)
 	assign_print_function(&input);
 	input.show_hidden = input.flags & A ? 1 : 0;
 	fill_dequeue_function(&input);
-	while ((input.directories)[i])
+//	files_first_alpha(t_in_file *n1, t_in_file *n2)
+	result = sort_input(&(input.directories), files_first_alpha);
+//	elem = *head;
+	elem = input.directories;
+	while (elem)
 	{
-		if (is_directory(input.directories[i]))
-			get_directory(input.directories[i], &input, current);
+		if (is_directory(elem->path))
+			get_directory(elem->path, &input, current, result);
 		else
-			print_single_file(input.directories[i], input);
-		free(input.directories[i++]);
+			print_single_file(elem->path, input);
+		elem = elem->next;
 	}
-	free(input.directories);
+	free_input(input.directories);
 	return (0);
 }

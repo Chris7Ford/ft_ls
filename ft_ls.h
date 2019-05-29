@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/25 12:52:32 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 09:53:22 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,12 @@ struct							s_f_node
 	struct s_f_node				*right;
 	struct s_f_node				*left;
 	unsigned int				filetype : 7;
+	unsigned int				is_link : 1;
+	unsigned int				hidden : 1;
 	char						*username;
 	char						*groupname;
 	char						*f_name;
 	int							permissions;
-	int							is_link : 1;
-	int							hidden : 1;
 	int							hlink;
 	int							size;
 	int							uid;
@@ -66,11 +66,11 @@ struct							s_info
 {
 	struct timespec				last_modified;
 	unsigned int				filetype : 7;
+	unsigned int				hidden : 1;
 	char						*groupname;
 	char						*username;
 	char						*f_name;
 	int							permissions;
-	int							hidden : 1;
 	int							hlink;
 	int							size;
 	int							uid;
@@ -85,14 +85,22 @@ struct							s_q_link
 	char						*directory;
 };
 
+typedef struct s_in_file		t_in_file;
+struct							s_in_file
+{
+	t_in_file					*next;
+	char						*path;
+	unsigned int				is_directory : 1;
+};
+
 typedef struct s_input			t_input;
 struct							s_input
 {
+	t_in_file					*directories;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
 								(t_f_node *node, t_input input));
 	void						(*file_print)(t_f_node *node, t_input input);
-	char						**directories;
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
@@ -120,7 +128,7 @@ void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
 int								get_stat_info(t_info *current, char *f_name, char *path);
 int								get_directory(char *directory_name,
-								t_input *input, t_info current);
+								t_input *input, t_info current, int first);
 void							free_tree(t_f_node *head);
 int								main(int argc, char **argv);
 #endif
