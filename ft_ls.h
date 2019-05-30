@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 17:25:16 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 18:04:48 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@
 # define LAST_MOD				2
 # define DO_NOT_SORT			4
 # define LAST_ACCESS			8
+# define SIX_MONTHS				15780000
 
 typedef struct s_f_node			t_f_node;
 struct							s_f_node

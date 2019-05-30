@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 17:25:55 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 18:18:52 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ void	print_link_file(t_f_node *node) //
 		buffer[count] = '\0';
 		write(1, " -> ", 4);
 		write(1, buffer, ft_strlen(buffer));
-//		ft_printf(" -> %s", buffer);
 	}
 }
 
@@ -238,9 +237,6 @@ void	handle_left_tree_inbalance(t_f_node **grand)
 	if ((*grand)->left->right)
 		(*grand)->left = left_rotate((*grand)->left);
 	*grand = right_rotate(*grand);
-//	printf("after handling the left tree inbalance, the structof the tree looks like this:\n");
-//	printf("          %s\n",(*grand)->f_name);
-//	printf("%s                  %s\n",(*grand)->left->f_name, (*grand)->right->f_name);
 }
 
 void	traverse_nodes_to_insert(t_f_node **orig, t_info info, int (*cmp)(t_f_node*, t_info))
@@ -356,8 +352,27 @@ void	print_file_type(t_f_node *current)
 		write(1, "s", 1);
 }
 
+void	print_last_mod(t_f_node *node)
+{
+	time_t		now;
+	time_t		current_time;
+	char		*str;
+
+	current_time = node->last_modified.tv_sec;
+	str = ctime(&current_time);
+	now = time(0);
+	write(1, str + 4, 7);
+	if ((now - current_time) <= SIX_MONTHS)
+		write(1, str + 11, 5);
+	else
+		write(1, str + 20, 4);
+	write(1, " ", 1);
+}
+
 void	print_long_file_info(t_f_node *node, t_input input) //
 {
+	long		time;
+
 	if (input.flags & A || node->hidden == 0)
 	{
 		print_file_type(node);
@@ -368,6 +383,7 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 //			ft_printf("%s", node->username);
 //		ft_printf("%s", node->groupname);
 //		ft_printf("%d\n", node->size);
+		print_last_mod(node);
 		print_filename(node, input);
 	}
 }
