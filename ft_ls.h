@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 18:04:48 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/30 16:03:37 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <grp.h>
 # include <time.h>
 # include <unistd.h>
+//# include "l_types.h"
 
 # define BLOCK_DEVICE 			1
 # define CHARACTER_DEVICE	 	2
@@ -56,6 +57,8 @@ struct							s_f_node
 	unsigned int				filetype : 7;
 	unsigned int				is_link : 1;
 	unsigned int				hidden : 1;
+	unsigned int				major;
+	unsigned int				minor;
 	char						*username;
 	char						*groupname;
 	char						*f_name;
@@ -71,8 +74,11 @@ struct							s_info
 {
 	struct timespec				last_modified;
 	struct timespec				last_accessed;
+	unsigned int				device_detected;
 	unsigned int				filetype : 7;
 	unsigned int				hidden : 1;
+	unsigned int				major;
+	unsigned int				minor;
 	char						*groupname;
 	char						*username;
 	char						*f_name;

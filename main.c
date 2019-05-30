@@ -1,12 +1,11 @@
-/* ************************************************************************** */
-/*                                                                            */
+
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 18:18:52 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/30 12:52:56 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +146,8 @@ t_f_node	*create_node(t_info info)
 	node->permissions = info.permissions;
 	node->last_modified = info.last_modified;
 	node->last_accessed = info.last_accessed;
+	node->major = info.major;
+	node->minor = info.minor;
 	node->hidden = info.hidden;
 	node->hlink = info.hlink;
 	node->size = info.size;
@@ -382,6 +383,12 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 //		if (!(input.flags & G))
 //			ft_printf("%s", node->username);
 //		ft_printf("%s", node->groupname);
+		if (node->filetype & BLOCK_DEVICE || node->filetype & CHARACTER_DEVICE)
+		{
+		//	ft_printf("Major: %d\n", node->major);
+		//	ft_printf("Minor: %d\n", node->minor);
+		}
+		else
 //		ft_printf("%d\n", node->size);
 		print_last_mod(node);
 		print_filename(node, input);
@@ -414,6 +421,11 @@ int		get_stat_info(t_info *current, char *f_name, char *path)
 		temp = file_to_path(path, current->f_name);
 		if (lstat(temp, &buf) == -1)
 			return (0);
+	}
+	if (current->filetype & BLOCK_DEVICE || current->filetype & CHARACTER_DEVICE)
+	{
+		current->major = major(buf.st_rdev);
+		current->minor = minor(buf.st_rdev);
 	}
 	fill_permissions(current, buf.st_mode);
 	current->hlink = buf.st_nlink;
@@ -557,7 +569,7 @@ void		get_long_info(t_info *current, char *directory_name)
 {
 			get_stat_info(current, current->f_name, directory_name);
 //			get_owner_info(&current);
-//			get_group_info(&current);
+			get_group_info(current);
 }
 
 int			throw_err(void)
