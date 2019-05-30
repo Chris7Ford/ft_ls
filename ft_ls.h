@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 09:53:22 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 17:25:16 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # define FIFO					8
 # define SYMLINK				16
 # define REG					32
-//# define SOCK					64
+# define SOCKET					64
 # define L						1
 # define CR						2
 # define A						4
@@ -38,14 +38,18 @@
 # define F						64
 # define G						128
 # define D						256
+# define Y						512
+# define Z						1024
 # define ALPHA					1
 # define LAST_MOD				2
 # define DO_NOT_SORT			4
+# define LAST_ACCESS			8
 
 typedef struct s_f_node			t_f_node;
 struct							s_f_node
 {
 	struct timespec				last_modified;
+	struct timespec				last_accessed;
 	struct s_f_node				*right;
 	struct s_f_node				*left;
 	unsigned int				filetype : 7;
@@ -65,6 +69,7 @@ typedef struct s_info			t_info;
 struct							s_info
 {
 	struct timespec				last_modified;
+	struct timespec				last_accessed;
 	unsigned int				filetype : 7;
 	unsigned int				hidden : 1;
 	char						*groupname;
@@ -96,6 +101,7 @@ struct							s_in_file
 typedef struct s_input			t_input;
 struct							s_input
 {
+	unsigned int				flags : 11;
 	t_in_file					*directories;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
@@ -104,7 +110,6 @@ struct							s_input
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
-	int							flags : 9;
 };
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);

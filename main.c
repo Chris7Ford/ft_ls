@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/29 15:51:33 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/29 17:25:55 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,39 @@
 #include "libft/libft.h"
 
 #include <stdio.h>
+
+int		is_directory(char *path)
+{
+	struct stat	details;
+
+	stat(path, &details);
+	return (S_ISDIR(details.st_mode));
+}
+
+int		sort_alpha(char *str1, char *str2)
+{
+	int		i;
+	
+	i = 0;
+	while (str1[i] == str2[i] && str1[i] != '\0')
+		i++;
+	return (str1[i] > str2[i]);
+}
+
+int		sort_length_node(t_f_node *n1, t_info n2)
+{
+	int		len1;
+	int		len2;
+
+	len1 = ft_strlen(n1->f_name);
+	len2 = ft_strlen(n2.f_name);
+
+	if (len1 > len2)
+		return (0);
+	if (len1 < len2)
+		return (1);
+	return (sort_alpha(n1->f_name, n2.f_name));
+}
 
 int		sort_alpha_node(t_f_node *n1, t_info n2)
 {
@@ -23,6 +56,26 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
 		i++;
 	return (!((n1->f_name)[i] < n2.f_name[i]));
+}
+
+int		sort_directories_first_node(t_f_node *n1, t_info n2)
+{
+	if (is_directory(n1->f_name))
+	{
+		if (is_directory(n2.f_name))
+			return (sort_alpha(n1->f_name, n2.f_name));
+		return (0);
+	}
+	if (is_directory(n2.f_name))
+		return (1);
+	return (sort_alpha(n1->f_name, n2.f_name));
+}
+
+int		sort_accessed(t_f_node *n1, t_info n2)
+{
+	if (n1->last_accessed.tv_sec == n2.last_accessed.tv_sec)
+		return (sort_alpha_node(n1, n2));
+	return (n1->last_accessed.tv_sec < n2.last_accessed.tv_sec);
 }
 
 int		sort_modified(t_f_node *n1, t_info n2)
@@ -37,21 +90,30 @@ int		do_not_sort(t_f_node *n1, t_info n2)
 	return (0);
 }
 
+void	print_link_file(t_f_node *node) //
+{
+	char	buffer[4097];
+	int		count;
+
+	count = readlink(node->f_name, buffer, sizeof(buffer));
+	if (count >= 0)
+	{
+		buffer[count] = '\0';
+		write(1, " -> ", 4);
+		write(1, buffer, ft_strlen(buffer));
+//		ft_printf(" -> %s", buffer);
+	}
+}
+
 void	print_filename(t_f_node *node, t_input input)
 {
 	if (input.show_hidden || !(node->hidden))
 	{
 		write(1, node->f_name, ft_strlen(node->f_name));
+		if (node->is_link)
+			print_link_file(node);
 		ft_putchar('\n');
 	}
-}
-
-int		is_directory(char *path)
-{
-	struct stat	details;
-
-	stat(path, &details);
-	return (S_ISDIR(details.st_mode));
 }
 
 char		*file_to_path(char *path, char *file)
@@ -85,6 +147,7 @@ t_f_node	*create_node(t_info info)
 	node->filetype = info.filetype;
 	node->permissions = info.permissions;
 	node->last_modified = info.last_modified;
+	node->last_accessed = info.last_accessed;
 	node->hidden = info.hidden;
 	node->hlink = info.hlink;
 	node->size = info.size;
@@ -283,19 +346,14 @@ void	print_file_type(t_f_node *current)
 		ft_putchar('l');
 		current->is_link = 1;
 	}
-}
-
-void	print_link_file(t_f_node *node) //
-{
-	char	buffer[4097];
-	int		count;
-
-	count = readlink(node->f_name, buffer, sizeof(buffer));
-	if (count >= 0)
-	{
-		buffer[count] = '\0';
-//		ft_printf(" -> %s", buffer);
-	}
+	else if (current->filetype & BLOCK_DEVICE)
+		write(1, "b", 1);
+	else if (current->filetype & CHARACTER_DEVICE)
+		write(1, "c", 1);
+	else if (current->filetype & FIFO)
+		write(1, "p", 1);
+	else if (current->filetype & SOCKET)
+		write(1, "s", 1);
 }
 
 void	print_long_file_info(t_f_node *node, t_input input) //
@@ -306,12 +364,11 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 		print_permissions(node);
 		ft_putchar(' ');
 //		ft_printf("%4d", node->hlink);
-//		ft_printf("%s", node->username);
+//		if (!(input.flags & G))
+//			ft_printf("%s", node->username);
 //		ft_printf("%s", node->groupname);
 //		ft_printf("%d\n", node->size);
 		print_filename(node, input);
-		if (node->is_link)
-			print_link_file(node);
 	}
 }
 
@@ -379,6 +436,7 @@ int		get_sort_info(t_info *current, char *path) //
 	}
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
+	current->last_accessed = buf.st_atimespec;
 	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 	return (1);
 }
@@ -578,9 +636,13 @@ void	add_flag(t_input *input, char c) //
 		input->flags = input->flags | G;
 	else if (c == 'd')
 		input->flags = input->flags | D;
+	else if (c == 'y')
+		input->flags = input->flags | Y;
+	else if (c == 'z')
+		input->flags = input->flags | Z;
 	else
 	{
-		ft_putstr("usage: ft_ls [-Radfglrtu] [file ...]\n");
+		ft_putstr("usage: ft_ls [-Radfglrtuy] [file ...]\n");
 		exit(0);
 	}
 }
@@ -631,16 +693,6 @@ void	push_input_file(t_in_file **head, char *path, int is_dir)
 			temp = temp->next;
 		temp->next = create_in_file_node(path, is_dir);
 	}
-}
-
-int			sort_alpha(char *str1, char *str2)
-{
-	int		i;
-	
-	i = 0;
-	while (str1[i] == str2[i] && str1[i] != '\0')
-		i++;
-	return (str1[i] > str2[i]);
 }
 
 int			files_first_alpha(t_in_file *n1, t_in_file *n2)
@@ -782,6 +834,12 @@ void	assign_sorting_function(t_input *input) //
 		input->sort = sort_modified;
 	else if (input->flags & F)
 		input->sort = do_not_sort;
+	else if (input->flags & U)
+		input->sort = sort_accessed;
+	else if (input->flags & Y)
+		input->sort = sort_directories_first_node;
+	else if (input->flags & Z)
+		input->sort = sort_length_node;
 	else
 		input->sort = sort_alpha_node;
 }
@@ -861,7 +919,7 @@ int		main(int argc, char **argv)
 	elem = input.directories;
 	while (elem)
 	{
-		if (is_directory(elem->path))
+		if (is_directory(elem->path) && !(input.flags & D))
 			get_directory(elem->path, &input, current, result);
 		else
 			print_single_file(elem->path, input);
