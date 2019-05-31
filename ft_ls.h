@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/30 16:03:37 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/30 19:04:32 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,12 +59,12 @@ struct							s_f_node
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
+	long long					size;
 	char						*username;
 	char						*groupname;
 	char						*f_name;
 	int							permissions;
 	int							hlink;
-	int							size;
 	int							uid;
 	int							gid;
 };
@@ -79,12 +79,12 @@ struct							s_info
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
+	long long					size;
 	char						*groupname;
 	char						*username;
 	char						*f_name;
 	int							permissions;
 	int							hlink;
-	int							size;
 	int							uid;
 	int							gid;
 };
@@ -117,6 +117,7 @@ struct							s_input
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
+	int							size;
 };
 
 int								sort_alpha_node(t_f_node *n1, t_info n2);
@@ -138,7 +139,8 @@ void							inorder_traversal_apply(t_f_node *elem, t_input input,
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
-int								get_stat_info(t_info *current, char *f_name, char *path);
+int								get_stat_info(t_info *current, char *f_name, char *path,
+								t_input *input);
 int								get_directory(char *directory_name,
 								t_input *input, t_info current, int first);
 void							free_tree(t_f_node *head);

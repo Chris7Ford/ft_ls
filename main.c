@@ -1,11 +1,12 @@
-
+/* ************************************************************************** */
+/*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/05/18 19:33:47 by chford            #+#    #+#             */
-/*   Updated: 2019/05/30 12:52:56 by chford           ###   ########.fr       */
+/*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
+/*   Updated: 2019/05/30 19:15:48 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -385,7 +386,7 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 //		ft_printf("%s", node->groupname);
 		if (node->filetype & BLOCK_DEVICE || node->filetype & CHARACTER_DEVICE)
 		{
-		//	ft_printf("Major: %d\n", node->major);
+		//	printf("Major: %d\n", node->major);
 		//	ft_printf("Minor: %d\n", node->minor);
 		}
 		else
@@ -411,7 +412,7 @@ void	fill_file_type(t_info *current, struct stat buf) //
 		current->filetype = SYMLINK;
 }
 
-int		get_stat_info(t_info *current, char *f_name, char *path)
+int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input)
 {
 	struct stat		buf;
 	char			*temp;
@@ -430,6 +431,8 @@ int		get_stat_info(t_info *current, char *f_name, char *path)
 	fill_permissions(current, buf.st_mode);
 	current->hlink = buf.st_nlink;
 	current->size = buf.st_size;
+	if (current->hidden == 0 || input->show_hidden)
+		input->size += buf.st_blocks;
 	current->uid = buf.st_uid;
 	current->gid = buf.st_gid;
 	return (1);
@@ -565,9 +568,9 @@ void			fill_dequeue_function(t_input *input)
 		input->dequeue = unshift_queue;
 }
 
-void		get_long_info(t_info *current, char *directory_name)
+void		get_long_info(t_info *current, char *directory_name, t_input *input)
 {
-			get_stat_info(current, current->f_name, directory_name);
+			get_stat_info(current, current->f_name, directory_name, input);
 //			get_owner_info(&current);
 			get_group_info(current);
 }
@@ -585,7 +588,7 @@ void		get_file_info(t_info *current, t_input *input,
 	current->f_name = ft_strdup(file->d_name);
 	get_sort_info(current, directory_name);
 	if (input->flags & L)
-		get_long_info(current, directory_name);
+		get_long_info(current, directory_name, input);
 }
 
 void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
@@ -625,6 +628,8 @@ int			get_directory(char *directory_name, t_input *input, t_info current, int fi
 			push_queue(file->d_name, &queue, current);
 	}
 	(void)closedir(directory);
+//	if (input->flags & L)
+//		ft_printf("total %d\n", input->size);
 	input->for_each_node(head, *input, input->file_print);
 	while (input->flags & CR && queue)
 		handle_queue(&queue, directory_name, input);
@@ -907,7 +912,7 @@ void	print_single_file(char *path, t_input input)
 		head = 0;
 		current.f_name = ft_strdup(path);
 		get_sort_info(&current, path);
-		get_stat_info(&current, path, "00");
+		get_stat_info(&current, path, "00", &input);
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
@@ -941,10 +946,9 @@ int		main(int argc, char **argv)
 	assign_print_function(&input);
 	input.show_hidden = input.flags & A ? 1 : 0;
 	fill_dequeue_function(&input);
-//	files_first_alpha(t_in_file *n1, t_in_file *n2)
 	result = sort_input(&(input.directories), files_first_alpha);
-//	elem = *head;
 	elem = input.directories;
+	input.size = 0;
 	while (elem)
 	{
 		if (is_directory(elem->path) && !(input.flags & D))
