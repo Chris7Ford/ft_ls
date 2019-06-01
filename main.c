@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/05/30 19:15:48 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/31 18:19:25 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,20 @@ int		sort_directories_first_node(t_f_node *n1, t_info n2)
 	return (sort_alpha(n1->f_name, n2.f_name));
 }
 
+void	check_exists(t_in_file *elem)
+{
+	struct stat	details;
+	struct dirent	*file;
+	DIR				*directory;
+
+	directory = opendir(elem->path);
+	if (stat(elem->path, &details) == -1 || !directory)
+	{
+		if (errno == 2 || errno == 13)
+			elem->error = errno;
+	}
+}
+
 int		sort_accessed(t_f_node *n1, t_info n2)
 {
 	if (n1->last_accessed.tv_sec == n2.last_accessed.tv_sec)
@@ -109,7 +123,7 @@ void	print_filename(t_f_node *node, t_input input)
 	if (input.show_hidden || !(node->hidden))
 	{
 		write(1, node->f_name, ft_strlen(node->f_name));
-		if (node->is_link)
+		if (node->is_link && input.flags & L)
 			print_link_file(node);
 		ft_putchar('\n');
 	}
@@ -151,6 +165,7 @@ t_f_node	*create_node(t_info info)
 	node->minor = info.minor;
 	node->hidden = info.hidden;
 	node->hlink = info.hlink;
+	node->error = 0;
 	node->size = info.size;
 	node->uid = info.uid;
 	node->gid = info.gid;
@@ -367,7 +382,10 @@ void	print_last_mod(t_f_node *node)
 	if ((now - current_time) <= SIX_MONTHS)
 		write(1, str + 11, 5);
 	else
+	{
+		write(1, " ", 1);
 		write(1, str + 20, 4);
+	}
 	write(1, " ", 1);
 }
 
@@ -575,12 +593,6 @@ void		get_long_info(t_info *current, char *directory_name, t_input *input)
 			get_group_info(current);
 }
 
-int			throw_err(void)
-{
-	perror("ft_ls: ");
-	return (0);
-}
-
 void		get_file_info(t_info *current, t_input *input,
 		struct dirent *file, char *directory_name)
 {
@@ -612,8 +624,6 @@ int			get_directory(char *directory_name, t_input *input, t_info current, int fi
 	head = 0;
 	queue = 0;
 	directory = opendir(directory_name);
-	if (!directory)
-		return (throw_err());
 	if (!first)
 	{
 		write(1, "\n", 1);
@@ -710,6 +720,7 @@ t_in_file	*create_in_file_node(char *path, int is_dir)
 	elem->path = ft_strdup(path);
 	elem->is_directory = is_dir;
 	elem->next = 0;
+	elem->error = 0;
 	return (elem);
 }
 
@@ -719,12 +730,16 @@ void	push_input_file(t_in_file **head, char *path, int is_dir)
 
 	temp = *head;
 	if (!temp)
+	{
 		*head = create_in_file_node(path, is_dir);
+		check_exists(*head);
+	}
 	else
 	{
 		while (temp->next)
 			temp = temp->next;
 		temp->next = create_in_file_node(path, is_dir);
+		check_exists(temp->next);
 	}
 }
 
@@ -904,9 +919,7 @@ void	print_single_file(char *path, t_input input)
 	t_f_node	*head;
 	t_info		current;
 
-	if (stat(path, &details) == -1)
-		throw_err();
-	else if (input.flags & L)
+	if (input.flags & L)
 	{
 		//Here, we need to see if this file exists and get all of its information.
 		head = 0;
@@ -931,6 +944,48 @@ void	free_input(t_in_file *file)
 	free(file);
 }
 
+void	print_no_rights_err(t_in_file *head)
+{
+	struct dirent	*file;
+	t_in_file		*elem;
+	DIR				*directory;
+
+
+	elem = head;
+	while (elem)
+	{
+		if (elem->error == 13)
+		{
+			directory = opendir(elem->path);
+			write(1, "ft_ls: ", 7);
+			write(1, elem->path, ft_strlen(elem->path));
+			write(1, ": ", 2);
+			perror(0);
+		}
+		elem = elem->next;
+	}
+}
+
+void	print_no_exists_err(t_in_file *head)
+{
+	t_in_file	*elem;
+	struct stat	details;
+
+	elem = head;
+	while (elem)
+	{
+		if (elem->error == 2)
+		{
+			stat(elem->path, &details);
+			write(1, "ft_ls: ", 7);
+			write(1, elem->path, ft_strlen(elem->path));
+			write(1, ": ", 2);
+			perror(0);
+		}
+		elem = elem->next;
+	}
+}
+
 int		main(int argc, char **argv)
 {
 	t_in_file	*elem;
@@ -949,14 +1004,16 @@ int		main(int argc, char **argv)
 	result = sort_input(&(input.directories), files_first_alpha);
 	elem = input.directories;
 	input.size = 0;
+	print_no_exists_err(elem);
 	while (elem)
 	{
-		if (is_directory(elem->path) && !(input.flags & D))
+		if (is_directory(elem->path) && !(input.flags & D) && !(elem->error))
 			get_directory(elem->path, &input, current, result);
-		else
+		else if (!(elem->error))
 			print_single_file(elem->path, input);
 		elem = elem->next;
 	}
+	print_no_rights_err(input.directories);
 	free_input(input.directories);
 	return (0);
 }

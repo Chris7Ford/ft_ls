@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/30 19:04:32 by chford           ###   ########.fr       */
+/*   Updated: 2019/05/31 16:50:21 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <grp.h>
 # include <time.h>
 # include <unistd.h>
-//# include "l_types.h"
+# include <errno.h>
 
 # define BLOCK_DEVICE 			1
 # define CHARACTER_DEVICE	 	2
@@ -65,6 +65,7 @@ struct							s_f_node
 	char						*f_name;
 	int							permissions;
 	int							hlink;
+	int							error;
 	int							uid;
 	int							gid;
 };
@@ -85,6 +86,7 @@ struct							s_info
 	char						*f_name;
 	int							permissions;
 	int							hlink;
+	int							error;
 	int							uid;
 	int							gid;
 };
@@ -103,6 +105,7 @@ struct							s_in_file
 	t_in_file					*next;
 	char						*path;
 	unsigned int				is_directory : 1;
+	int							error;
 };
 
 typedef struct s_input			t_input;
