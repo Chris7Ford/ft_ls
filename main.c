@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/02 13:53:02 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 13:58:08 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -705,6 +705,7 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 
 	head = 0;
 	queue = 0;
+	input->size = 0;
 	directory = opendir(directory_name);
 	if (!directory && push_input_file(&(input->directories), directory_name, 1, first == 1 ? 0 : 1))
 		return ;
