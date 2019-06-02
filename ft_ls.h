@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/05/31 16:50:21 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/01 17:40:40 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <time.h>
 # include <unistd.h>
 # include <errno.h>
+# include "ft_printf.h"
 
 # define BLOCK_DEVICE 			1
 # define CHARACTER_DEVICE	 	2
@@ -30,17 +31,17 @@
 # define SYMLINK				16
 # define REG					32
 # define SOCKET					64
-# define L						1
-# define CR						2
-# define A						4
-# define R						8
-# define T						16
-# define U						32
-# define F						64
-# define G						128
-# define D						256
-# define Y						512
-# define Z						1024
+# define _L						1
+# define _CR					2
+# define _A						4
+# define _R						8
+# define _T						16
+# define _U						32
+# define _F						64
+# define _G						128
+# define _D						256
+# define _Y						512
+# define _Z						1024
 # define ALPHA					1
 # define LAST_MOD				2
 # define DO_NOT_SORT			4
@@ -106,6 +107,7 @@ struct							s_in_file
 	char						*path;
 	unsigned int				is_directory : 1;
 	int							error;
+	int							pd;
 };
 
 typedef struct s_input			t_input;
@@ -144,7 +146,7 @@ void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
 int								get_stat_info(t_info *current, char *f_name, char *path,
 								t_input *input);
-int								get_directory(char *directory_name,
+void							get_directory(char *directory_name,
 								t_input *input, t_info current, int first);
 void							free_tree(t_f_node *head);
 int								main(int argc, char **argv);

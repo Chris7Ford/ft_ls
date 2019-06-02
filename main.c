@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/05/31 18:19:25 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 10:12:15 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include "libft/libft.h"
 
 #include <stdio.h>
+
+int		push_input_file(t_in_file **head, char *path, int is_dir, int pd);
 
 int		is_directory(char *path)
 {
@@ -123,7 +125,7 @@ void	print_filename(t_f_node *node, t_input input)
 	if (input.show_hidden || !(node->hidden))
 	{
 		write(1, node->f_name, ft_strlen(node->f_name));
-		if (node->is_link && input.flags & L)
+		if (node->is_link && input.flags & _L)
 			print_link_file(node);
 		ft_putchar('\n');
 	}
@@ -393,22 +395,21 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 {
 	long		time;
 
-	if (input.flags & A || node->hidden == 0)
+	if (input.flags & _A || node->hidden == 0)
 	{
 		print_file_type(node);
 		print_permissions(node);
-		ft_putchar(' ');
-//		ft_printf("%4d", node->hlink);
-//		if (!(input.flags & G))
-//			ft_printf("%s", node->username);
-//		ft_printf("%s", node->groupname);
+		ft_printf("%3d ", node->hlink);
+		if (!(input.flags & _G))
+			ft_printf("%-7s", node->username);
+		ft_printf(" %s", node->groupname);
 		if (node->filetype & BLOCK_DEVICE || node->filetype & CHARACTER_DEVICE)
 		{
-		//	printf("Major: %d\n", node->major);
-		//	ft_printf("Minor: %d\n", node->minor);
+			printf("Major: %d\n", node->major);
+			ft_printf("Minor: %d\n", node->minor);
 		}
 		else
-//		ft_printf("%d\n", node->size);
+		ft_printf("%7d ", node->size);
 		print_last_mod(node);
 		print_filename(node, input);
 	}
@@ -580,7 +581,7 @@ void		reset_t_info(t_info *current)
 
 void			fill_dequeue_function(t_input *input)
 {
-	if (input->flags & R)
+	if (input->flags & _R)
 		input->dequeue = pop_queue;
 	else
 		input->dequeue = unshift_queue;
@@ -589,7 +590,7 @@ void			fill_dequeue_function(t_input *input)
 void		get_long_info(t_info *current, char *directory_name, t_input *input)
 {
 			get_stat_info(current, current->f_name, directory_name, input);
-//			get_owner_info(&current);
+			get_owner_info(current);
 			get_group_info(current);
 }
 
@@ -599,7 +600,7 @@ void		get_file_info(t_info *current, t_input *input,
 	reset_t_info(current);
 	current->f_name = ft_strdup(file->d_name);
 	get_sort_info(current, directory_name);
-	if (input->flags & L)
+	if (input->flags & _L)
 		get_long_info(current, directory_name, input);
 }
 
@@ -614,7 +615,14 @@ void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 	free(tmp);
 }
 
-int			get_directory(char *directory_name, t_input *input, t_info current, int first)
+void		print_directory_name(char *directory_name)
+{
+	write(1, "\n", 1);
+	write(1, directory_name, ft_strlen(directory_name));
+	write(1, ":\n", 2);
+}
+
+void		get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
 	t_f_node		*head;
@@ -624,27 +632,24 @@ int			get_directory(char *directory_name, t_input *input, t_info current, int fi
 	head = 0;
 	queue = 0;
 	directory = opendir(directory_name);
+	if (!directory && push_input_file(&(input->directories), directory_name, 1, first == 1 ? 0 : 1))
+		return ;
 	if (!first)
-	{
-		write(1, "\n", 1);
-		write(1, directory_name, ft_strlen(directory_name));
-		write(1, ":\n", 2);
-	}
+		print_directory_name(directory_name);
 	while ((file = readdir(directory)))
 	{
 		get_file_info(&current, input, file, directory_name);
 		insert_node(&head, current, input->sort);
-		if (input->flags & CR && current.filetype & DIRECTORY && recurse_me(file->d_name, *input))
+		if (input->flags & _CR && current.filetype & DIRECTORY && recurse_me(file->d_name, *input))
 			push_queue(file->d_name, &queue, current);
 	}
 	(void)closedir(directory);
-//	if (input->flags & L)
-//		ft_printf("total %d\n", input->size);
+	if (input->flags & _L)
+		ft_printf("total %d\n", input->size);
 	input->for_each_node(head, *input, input->file_print);
-	while (input->flags & CR && queue)
+	while (input->flags & _CR && queue)
 		handle_queue(&queue, directory_name, input);
 	free_tree(head);
-	return (1);
 }
 
 void	free_tree(t_f_node *head)
@@ -654,35 +659,35 @@ void	free_tree(t_f_node *head)
 	free_tree(head->right);
 	free_tree(head->left);
 	free(head->f_name);
-//	free(head->username);
-//	free(head->groupname);
+	free(head->username);
+	free(head->groupname);
 	free(head);
 }
 
 void	add_flag(t_input *input, char c) //
 {
 	if (c == 'l')
-		input->flags = input->flags | L;
+		input->flags = input->flags | _L;
 	else if (c == 'R')
-		input->flags = input->flags | CR;
+		input->flags = input->flags | _CR;
 	else if (c == 'a')
-		input->flags = input->flags | A;
+		input->flags = input->flags | _A;
 	else if (c == 'r')
-		input->flags = input->flags | R;
+		input->flags = input->flags | _R;
 	else if (c == 't')
-		input->flags = input->flags | T;
+		input->flags = input->flags | _T;
 	else if (c == 'u')
-		input->flags = input->flags | U;
+		input->flags = input->flags | _U;
 	else if (c == 'f')
-		input->flags = input->flags | F;
+		input->flags = input->flags | _F;
 	else if (c == 'g')
-		input->flags = input->flags | G;
+		input->flags = input->flags | _G;
 	else if (c == 'd')
-		input->flags = input->flags | D;
+		input->flags = input->flags | _D;
 	else if (c == 'y')
-		input->flags = input->flags | Y;
+		input->flags = input->flags | _Y;
 	else if (c == 'z')
-		input->flags = input->flags | Z;
+		input->flags = input->flags | _Z;
 	else
 	{
 		ft_putstr("usage: ft_ls [-Radfglrtuy] [file ...]\n");
@@ -704,15 +709,15 @@ int		parse_flag(t_input *input, char *str) //
 	return (0);
 }
 
-void	overwrite_flags(t_input *input) //
+void	overwrite_ls_flags(t_input *input) //
 {
-	if (input->flags & F && input->flags & T)
-		input->flags -= T;
-	if (input->flags & F)
-		input->flags |= A;
+	if (input->flags & _F && input->flags & _T)
+		input->flags -= _T;
+	if (input->flags & _F)
+		input->flags |= _A;
 }
 
-t_in_file	*create_in_file_node(char *path, int is_dir)
+t_in_file	*create_in_file_node(char *path, int is_dir, int pd)
 {
 	t_in_file	*elem;
 
@@ -721,26 +726,28 @@ t_in_file	*create_in_file_node(char *path, int is_dir)
 	elem->is_directory = is_dir;
 	elem->next = 0;
 	elem->error = 0;
+	elem->pd = pd;
 	return (elem);
 }
 
-void	push_input_file(t_in_file **head, char *path, int is_dir)
+int		push_input_file(t_in_file **head, char *path, int is_dir, int pd)
 {
 	t_in_file	*temp;
 
 	temp = *head;
 	if (!temp)
 	{
-		*head = create_in_file_node(path, is_dir);
+		*head = create_in_file_node(path, is_dir, pd);
 		check_exists(*head);
 	}
 	else
 	{
 		while (temp->next)
 			temp = temp->next;
-		temp->next = create_in_file_node(path, is_dir);
+		temp->next = create_in_file_node(path, is_dir, pd);
 		check_exists(temp->next);
 	}
+	return (1);
 }
 
 int			files_first_alpha(t_in_file *n1, t_in_file *n2)
@@ -852,25 +859,26 @@ void		get_input_info(t_input *input, int argc, char **argv) //
 
 	//f flag overwrites t.
 	i = 1;
+	input->flags = 0;
 	while (i < argc && parse_flag(input, argv[i]))
 		i++;
-	overwrite_flags(input);
+	overwrite_ls_flags(input);
 	input->directories = 0;
 	if (i < argc)
 	{
 		while (i < argc)
 		{
-			push_input_file(&(input->directories), argv[i], is_directory(argv[i]));
+			push_input_file(&(input->directories), argv[i], is_directory(argv[i]), 0);
 			i++;
 		}
 	}
 	else
-		push_input_file(&(input->directories), ".", 1);
+		push_input_file(&(input->directories), ".", 1, 0);
 }
 
 void	assign_traversal_function(t_input *input) //
 {
-	if (input->flags & R)
+	if (input->flags & _R)
 		input->for_each_node = &reverse_inorder_traversal_apply;
 	else
 		input->for_each_node = &inorder_traversal_apply;
@@ -878,15 +886,15 @@ void	assign_traversal_function(t_input *input) //
 
 void	assign_sorting_function(t_input *input) //
 {
-	if (input->flags & T)
+	if (input->flags & _T)
 		input->sort = sort_modified;
-	else if (input->flags & F)
+	else if (input->flags & _F)
 		input->sort = do_not_sort;
-	else if (input->flags & U)
+	else if (input->flags & _U)
 		input->sort = sort_accessed;
-	else if (input->flags & Y)
+	else if (input->flags & _Y)
 		input->sort = sort_directories_first_node;
-	else if (input->flags & Z)
+	else if (input->flags & _Z)
 		input->sort = sort_length_node;
 	else
 		input->sort = sort_alpha_node;
@@ -895,7 +903,7 @@ void	assign_sorting_function(t_input *input) //
 void	assign_print_function(t_input *input) //
 {
 	//all possible printing options are..... long and short. Thats it so far...
-	if (input->flags & L)
+	if (input->flags & _L)
 		input->file_print = print_long_file_info;
 	else
 		input->file_print = print_filename;
@@ -907,7 +915,7 @@ void	assign_print_function(t_input *input) //
 	reset_t_info(current);
 	current->f_name = ft_strdup(file->d_name);
 	get_sort_info(current, directory_name);
-	if (input->flags & L)
+	if (input->flags & _L)
 		get_long_info(current, directory_name);
 }*/
 
@@ -919,7 +927,7 @@ void	print_single_file(char *path, t_input input)
 	t_f_node	*head;
 	t_info		current;
 
-	if (input.flags & L)
+	if (input.flags & _L)
 	{
 		//Here, we need to see if this file exists and get all of its information.
 		head = 0;
@@ -944,24 +952,43 @@ void	free_input(t_in_file *file)
 	free(file);
 }
 
+void	free_string_array(char ***array)
+{
+	int		i;
+
+	i = 0;
+	while ((*array)[i])
+		free((*array)[i++]);
+	free(*array);
+	*array = 0;
+}
+
 void	print_no_rights_err(t_in_file *head)
 {
-	struct dirent	*file;
 	t_in_file		*elem;
+	char			**path_words;
+	int				i;
 	DIR				*directory;
 
-
 	elem = head;
+	i = 0;
 	while (elem)
 	{
-		if (elem->error == 13)
+		path_words = ft_strsplit(elem->path, '/');
+		while (path_words[i])
+			i++;
+		directory = opendir(elem->path);
+		if (errno == 13)
 		{
-			directory = opendir(elem->path);
-			write(1, "ft_ls: ", 7);
-			write(1, elem->path, ft_strlen(elem->path));
-			write(1, ": ", 2);
+			write(1, "\n", 1);
+			if (elem->pd)
+				ft_printf("%s:\nft_ls: ", elem->path);
+			while (ft_strcmp(path_words[i - 1], ".") == 0)
+				i--;
+			ft_printf("%s: ", path_words[i - 1]);
 			perror(0);
 		}
+		free_string_array(&path_words);
 		elem = elem->next;
 	}
 }
@@ -999,7 +1026,7 @@ int		main(int argc, char **argv)
 	assign_sorting_function(&input);
 	assign_traversal_function(&input);
 	assign_print_function(&input);
-	input.show_hidden = input.flags & A ? 1 : 0;
+	input.show_hidden = input.flags & _A ? 1 : 0;
 	fill_dequeue_function(&input);
 	result = sort_input(&(input.directories), files_first_alpha);
 	elem = input.directories;
@@ -1007,7 +1034,7 @@ int		main(int argc, char **argv)
 	print_no_exists_err(elem);
 	while (elem)
 	{
-		if (is_directory(elem->path) && !(input.flags & D) && !(elem->error))
+		if (is_directory(elem->path) && !(input.flags & _D) && !(elem->error))
 			get_directory(elem->path, &input, current, result);
 		else if (!(elem->error))
 			print_single_file(elem->path, input);
