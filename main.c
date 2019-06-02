@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/02 10:12:15 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 13:53:02 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,19 @@ int		sort_length_node(t_f_node *n1, t_info n2)
 int		sort_alpha_node(t_f_node *n1, t_info n2)
 {
 	int		i;
+	int		ret;
 
 	i = 0;
 	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
 		i++;
-	return (!((n1->f_name)[i] < n2.f_name[i]));
+	if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_isalpha(n2.f_name[i]))
+		ret = 1;
+	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_isalpha(n1->f_name[i]))
+		ret = 0;
+//	return (!((n1->f_name)[i] < n2.f_name[i]));
+	else
+		ret =  (!((n1->f_name)[i] < n2.f_name[i]));
+	return (ret);
 }
 
 int		sort_directories_first_node(t_f_node *n1, t_info n2)
@@ -405,8 +413,8 @@ void	print_long_file_info(t_f_node *node, t_input input) //
 		ft_printf(" %s", node->groupname);
 		if (node->filetype & BLOCK_DEVICE || node->filetype & CHARACTER_DEVICE)
 		{
-			printf("Major: %d\n", node->major);
-			ft_printf("Minor: %d\n", node->minor);
+			ft_printf(" %d,", node->major);
+			ft_printf(" %d ", node->minor);
 		}
 		else
 		ft_printf("%7d ", node->size);
@@ -462,7 +470,10 @@ void	get_owner_info(t_info *current) //
 	struct passwd	*pwd;
 
 	pwd = getpwuid(current->uid);
-	current->username = ft_strdup(pwd->pw_name);
+	if (pwd == 0)
+		current->username = ft_itoa(current->uid);
+	else
+		current->username = ft_strdup(pwd->pw_name);
 }
 
 void	get_group_info(t_info *current) //
@@ -622,6 +633,69 @@ void		print_directory_name(char *directory_name)
 	write(1, ":\n", 2);
 }
 
+int			filter_directory_queue(t_q_link *n1, t_q_link *n2)
+{
+	char	*s1;
+	char	*s2;
+	int		i;
+
+	s1 = n1->directory;
+	s2 = n2->directory;
+	i = 0;
+	while (s1[i] == s2[i] && s1[i])
+		i++;
+	if (ft_isalpha(s1[i]) == 0 && s1[i] != '.' && ft_isalpha(s2[i]))
+		return (1);
+	else if (ft_isalpha(s2[i]) == 0 && s2[i] != '.' && ft_isalpha(s1[i]))
+		return (0);
+	return (!((s1[i] < s2[i])));
+	
+}
+
+int		swap_queue_head(t_q_link **head)
+{
+	t_q_link	*elem;
+	t_q_link	*temp;
+
+	*head = elem->next;
+	temp = (*head)->next;
+	(*head)->next = elem;
+	elem->next = temp;
+	elem = *head;
+	return (1);
+}
+
+void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
+{
+	t_q_link	*elem;
+	t_q_link	*temp;
+	t_q_link	*other_temp;
+	int			complete;
+
+	if (!(*head) || !((*head)->next))
+		return ;
+	while (!complete)
+	{
+		elem = *head;
+		complete = 1;
+		if (f(*head, (*head)->next) && swap_queue_head(head))
+			elem = *head;
+		while (elem->next->next)
+		{
+			if (f(elem->next, elem->next->next))
+			{
+				complete = 0;
+				temp = elem->next->next->next;
+				other_temp = elem->next;
+				elem->next = elem->next->next;
+				elem->next->next = other_temp;
+				elem->next->next->next = temp;
+			}
+			elem = elem->next;
+		}
+	}
+}
+
 void		get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
@@ -647,6 +721,7 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	if (input->flags & _L)
 		ft_printf("total %d\n", input->size);
 	input->for_each_node(head, *input, input->file_print);
+	sort_queue(&queue, filter_directory_queue);
 	while (input->flags & _CR && queue)
 		handle_queue(&queue, directory_name, input);
 	free_tree(head);
@@ -766,7 +841,7 @@ int			files_first_alpha(t_in_file *n1, t_in_file *n2)
 		return (sort_alpha(n1->path, n2->path));
 }
 
-void	swap_head(t_in_file **head)
+void	swap_input_head(t_in_file **head)
 {
 	t_in_file	*elem;
 	t_in_file	*temp;
@@ -793,7 +868,7 @@ int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
 	{
 		complete = 1;
 		if (f(*head, (*head)->next))
-			swap_head(head);
+			swap_input_head(head);
 		while (elem->next->next)
 		{
 			if (is_directory(elem->path) || is_directory(elem->next->path))
@@ -825,7 +900,7 @@ int		sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
 		return (1);
 	elem = *head;
 	if (f(elem, elem->next))
-		swap_head(head);
+		swap_input_head(head);
 /*	while (!complete)
 	{
 		if (is_directory(elem->path) || is_directory(elem->next->path))

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/01 17:40:40 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 11:29:56 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,5 +149,4 @@ int								get_stat_info(t_info *current, char *f_name, char *path,
 void							get_directory(char *directory_name,
 								t_input *input, t_info current, int first);
 void							free_tree(t_f_node *head);
-int								main(int argc, char **argv);
 #endif
