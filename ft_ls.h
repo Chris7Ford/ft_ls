@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/02 11:29:56 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 20:24:08 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ struct							s_input
 {
 	unsigned int				flags : 11;
 	t_in_file					*directories;
+	t_in_file					*local_err;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
 								(t_f_node *node, t_input input));

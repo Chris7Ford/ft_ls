@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/02 13:58:08 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/02 20:34:03 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 int		push_input_file(t_in_file **head, char *path, int is_dir, int pd);
+void	print_no_rights_err(t_in_file *head);
 
 int		is_directory(char *path)
 {
@@ -696,6 +697,15 @@ void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
 	}
 }
 
+void		free_in_file(t_in_file *head)
+{
+	if (!head)
+		return ;
+	if (head->next)
+		free_in_file(head->next);
+	free(head);
+}
+
 void		get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
@@ -707,7 +717,7 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	queue = 0;
 	input->size = 0;
 	directory = opendir(directory_name);
-	if (!directory && push_input_file(&(input->directories), directory_name, 1, first == 1 ? 0 : 1))
+	if (!directory && push_input_file(&(input->local_err), directory_name, 1, first == 1 ? 0 : 1))
 		return ;
 	if (!first)
 		print_directory_name(directory_name);
@@ -722,10 +732,16 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	if (input->flags & _L)
 		ft_printf("total %d\n", input->size);
 	input->for_each_node(head, *input, input->file_print);
+	free_tree(head);
 	sort_queue(&queue, filter_directory_queue);
 	while (input->flags & _CR && queue)
 		handle_queue(&queue, directory_name, input);
-	free_tree(head);
+	if (input->local_err)
+	{
+		print_no_rights_err(input->local_err);
+		free_in_file(input->local_err);
+		input->local_err = 0;
+	}
 }
 
 void	free_tree(t_f_node *head)
@@ -1107,6 +1123,7 @@ int		main(int argc, char **argv)
 	result = sort_input(&(input.directories), files_first_alpha);
 	elem = input.directories;
 	input.size = 0;
+	input.local_err = 0;
 	print_no_exists_err(elem);
 	while (elem)
 	{
@@ -1116,7 +1133,7 @@ int		main(int argc, char **argv)
 			print_single_file(elem->path, input);
 		elem = elem->next;
 	}
-	print_no_rights_err(input.directories);
+	print_no_rights_err(elem);
 	free_input(input.directories);
 	return (0);
 }
