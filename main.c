@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/02 20:34:03 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/03 10:55:50 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include "libft/libft.h"
 
 #include <stdio.h>
+
+//./a.out file.txt afrawefa norights - does not print permission denied error
 
 int		push_input_file(t_in_file **head, char *path, int is_dir, int pd);
 void	print_no_rights_err(t_in_file *head);
@@ -1070,12 +1072,13 @@ void	print_no_rights_err(t_in_file *head)
 		while (path_words[i])
 			i++;
 		directory = opendir(elem->path);
-		if (errno == 13)
+//		if (errno == 13)
+		if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 		{
 			write(1, "\n", 1);
 			if (elem->pd)
 				ft_printf("%s:\nft_ls: ", elem->path);
-			while (ft_strcmp(path_words[i - 1], ".") == 0)
+			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
 			ft_printf("%s: ", path_words[i - 1]);
 			perror(0);
@@ -1133,6 +1136,7 @@ int		main(int argc, char **argv)
 			print_single_file(elem->path, input);
 		elem = elem->next;
 	}
+	elem = input.directories;
 	print_no_rights_err(elem);
 	free_input(input.directories);
 	return (0);
