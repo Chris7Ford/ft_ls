@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/04 13:04:03 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 13:14:08 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -571,14 +571,6 @@ void		reset_t_info(t_info *current)
  	current->gid = 0;
 }
 
-void			fill_dequeue_function(t_input *input)
-{
-	if (input->flags & _R)
-		input->dequeue = pop_queue;
-	else
-		input->dequeue = unshift_queue;
-}
-
 void		get_long_info(t_info *current, char *directory_name, t_input *input)
 {	
 	get_stat_info(current, current->f_name, directory_name, input);
@@ -1098,7 +1090,7 @@ void	init_input(t_input *input)
 	assign_traversal_function(input);
 	assign_print_function(input);
 	input->show_hidden = input->flags & _A ? 1 : 0;
-	fill_dequeue_function(input);
+	input->dequeue = unshift_queue;
 	input->size = 0;
 	input->local_err = 0;
 }
