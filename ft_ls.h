@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/03 18:09:24 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 12:57:30 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,10 @@ struct							s_input
 	t_in_file					*directories;
 	t_in_file					*local_err;
 	t_q_link					*(*dequeue)(t_q_link **head);
-	void						(*for_each_node)(t_f_node *elem, t_input input, void (*f)
-								(t_f_node *node, t_input input));
+	void						(*for_each_node)(t_f_node *elem, t_input input,
+								t_q_link **queue);
 	void						(*file_print)(t_f_node *node, t_input input);
+	void						(*q_sort)(t_q_link *n1, t_q_link *n2);
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
@@ -153,9 +154,9 @@ void							traverse_nodes_to_insert(t_f_node **orig, t_info info,
 void							insert_node(t_f_node **head, t_info info,
 								int (*cmp)(t_f_node*, t_info));
 void							inorder_traversal_apply(t_f_node *elem, t_input input,
-								void (*f)(t_f_node*, t_input));
-void							reverse_inorder_traversal_apply(t_f_node *elem, t_input input,
-								void (*f)(t_f_node*, t_input));
+								t_q_link **queue);
+void							reverse_inorder_traversal_apply(t_f_node *elem,
+								t_input input, t_q_link **queue);
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
@@ -168,8 +169,8 @@ int								get_stat_info(t_info *current, char *f_name,
 void							get_owner_info(t_info *current);
 void							get_group_info(t_info *current);
 int								get_sort_info(t_info *current, char *path);
-t_q_link						*create_link(char *str, t_info current);
-void							push_queue(char *name, t_q_link **head, t_info current);
+t_q_link						*create_link(char *str);
+void							push_queue(char *name, t_q_link **head);
 t_q_link						*pop_queue(t_q_link **head);
 t_q_link						*unshift_queue(t_q_link **head);
 int								recurse_me(char *directory, t_input input);
@@ -189,7 +190,6 @@ void							sort_queue(t_q_link **head,
 void							free_in_file(t_in_file *head);
 void							init_get_directory(t_f_node **head,
 								t_q_link **queue, t_input *input);
-void							handle_local_error(t_input *input);
 void							get_directory(char *directory_name, t_input *input,
 								t_info current, int first);
 void							free_tree(t_f_node *head);
@@ -212,7 +212,8 @@ void							assign_print_function(t_input *input);
 void							print_single_file(char *path, t_input input);
 void							free_input(t_in_file *file);
 void							free_string_array(char ***array);
-void							print_no_rights_err(t_in_file *head);
+void							print_no_rights_err_lst(t_in_file *head);
+void							print_no_rights_err_str(char *directory, int pd);
 void							print_no_exists_err(t_in_file *head);
 void							init_input(t_input *input);
 #endif

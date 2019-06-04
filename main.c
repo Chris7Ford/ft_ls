@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/03 20:02:29 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 13:04:03 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,22 +276,29 @@ void	insert_node(t_f_node **head, t_info info, int (*cmp)(t_f_node*, t_info))
 		traverse_nodes_to_insert(head, info, cmp);
 }
 
-void	inorder_traversal_apply(t_f_node *elem, t_input input, void (*f)(t_f_node*, t_input))
+void	inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue)
 {
 	if (elem->left)
-		inorder_traversal_apply(elem->left, input, f);
-	f(elem, input);
+		inorder_traversal_apply(elem->left, input, queue);
+	input.file_print(elem, input);
+	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
+		//This function will have to change to get the information from the node, not current...
+		push_queue(elem->f_name, queue);
 	if (elem->right)
-		inorder_traversal_apply(elem->right, input, f);
+		inorder_traversal_apply(elem->right, input, queue);
 }
 
-void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, void (*f)(t_f_node*, t_input))
+void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue)
 {
 	if (elem->right)
-		reverse_inorder_traversal_apply(elem->right, input, f);
-	f(elem, input);
+		reverse_inorder_traversal_apply(elem->right, input, queue);
+	input.file_print(elem, input);
+	
+	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
+		//This function will have to change to get the information from the node, not current...
+		push_queue(elem->f_name, queue);
 	if (elem->left)
-		reverse_inorder_traversal_apply(elem->left, input, f);
+		reverse_inorder_traversal_apply(elem->left, input, queue);
 }
 
 void	fill_permissions(t_info *current, int st_mode)
@@ -475,30 +482,32 @@ int		get_sort_info(t_info *current, char *path)
 	return (1);
 }
 
-t_q_link	*create_link(char *str, t_info current)
+t_q_link	*create_link(char *str)
 {
 	t_q_link	*new;
 
 	new = malloc(sizeof(t_q_link));
 	new->directory = ft_strdup(str);
-	new->info = current;
+//	new->info = current;
 	new->next = 0;
 	return (new);
 }
 
-void		push_queue(char *name, t_q_link **head, t_info current)
+void		push_queue(char *name, t_q_link **head)
 {
 	t_q_link	*link;
 
 	if (!(*head))
 	{
-		*head = create_link(name, current);
+//		*head = create_link(name, current);
+		*head = create_link(name);
 		return ;
 	}
 	link = *head;
 	while (link->next)
 		link = link->next;
-	link->next = create_link(name, current);
+//	link->next = create_link(name, current);
+	link->next = create_link(name);
 }
 
 t_q_link		*pop_queue(t_q_link **head)
@@ -682,16 +691,6 @@ void		init_get_directory(t_f_node **head, t_q_link **queue, t_input *input)
 	input->size = 0;
 }
 
-void		handle_local_error(t_input *input)
-{
-	if (input->local_err)
-	{
-		print_no_rights_err(input->local_err);
-		free_in_file(input->local_err);
-		input->local_err = 0;
-	}
-}
-
 void		get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
@@ -701,24 +700,25 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 
 	init_get_directory(&head, &queue, input);
 	directory = opendir(directory_name);
-	if (!directory && push_input_file(&(input->local_err), directory_name, 1, first == 1 ? 0 : 1))
+	if (!directory)
+	{
+		print_no_rights_err_str(directory_name, 1);
 		return ;
+	}
 	first ? 0 : print_directory_name(directory_name);
 	while ((file = readdir(directory)))
 	{
 		get_file_info(&current, input, file, directory_name);
 		insert_node(&head, current, input->sort);
-		if (input->flags & _CR && current.filetype & DIRECTORY && recurse_me(file->d_name, *input))
-			push_queue(file->d_name, &queue, current);
+		/////// push the queue from the traversal function so that we don't have to sort it in different ways...
 	}
 	(void)closedir(directory);
 	input->flags & _L ? ft_printf("total %d\n", input->size) : 0;
-	input->for_each_node(head, *input, input->file_print);
+	input->for_each_node(head, *input, &queue);
 	free_tree(head);
-	sort_queue(&queue, filter_directory_queue);
+//	sort_queue(&queue, filter_directory_queue);
 	while (input->flags & _CR && queue)
 		handle_queue(&queue, directory_name, input);
-	handle_local_error(input);
 }
 
 void	free_tree(t_f_node *head)
@@ -915,7 +915,9 @@ void		get_input_info(t_input *input, int argc, char **argv)
 	{
 		while (i < argc)
 		{
-			push_input_file(&(input->directories), argv[i], is_directory(argv[i]), 0);
+			push_input_file(&(input->directories), argv[i],
+					is_directory(argv[i]),
+					argc - i > 1 ? 1 : 0);
 			i++;
 		}
 	}
@@ -955,22 +957,34 @@ void	assign_print_function(t_input *input)
 		input->file_print = print_filename;
 }
 
+void	free_queue(t_q_link *queue)
+{
+	if (queue->next)
+		free_queue(queue->next);
+	free(queue->directory);
+	free(queue);
+}
+
 void	print_single_file(char *path, t_input input)
 {
 	struct stat	details;
 	t_f_node	*head;
+	t_q_link	*queue;
 	t_info		current;
 
 	if (input.flags & _L)
 	{
 		head = 0;
+		queue = 0;
 		current.f_name = ft_strdup(path);
 		get_sort_info(&current, path);
 		get_stat_info(&current, path, "00", &input);
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
-		input.for_each_node(head, input, input.file_print);
+		//input.for_each_node(head, input, input.file_print);
+		input.for_each_node(head, input, &queue);
+
 		free_tree(head);
 	}
 	else
@@ -1004,7 +1018,32 @@ int		dont_print_error(char *str)
 }
 
 
-void	print_no_rights_err(t_in_file *head)
+void	print_no_rights_err_str(char *path, int pd)
+{
+	char			**path_words;
+	int				i;
+	DIR				*directory;
+
+	i = 0;
+	path_words = ft_strsplit(path, '/');
+	while (path_words[i])
+		i++;
+	directory = opendir(path);
+	if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
+	{
+		while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
+			i--;
+		if (dont_print_error(path_words[i - 1]))
+			return ;
+		write(1, "\n", 1);
+		pd ? ft_printf("%s:\nft_ls: ", path) : 0;
+		ft_printf("%s: ", path_words[i - 1]);
+		perror(0);
+	}
+	free_string_array(&path_words);
+}
+
+void	print_no_rights_err_lst(t_in_file *head)
 {
 	t_in_file		*elem;
 	char			**path_words;
@@ -1012,8 +1051,7 @@ void	print_no_rights_err(t_in_file *head)
 	DIR				*directory;
 
 	elem = head;
-	i = 0;
-	while (elem)
+	while (elem && !(i = 0))
 	{
 		path_words = ft_strsplit(elem->path, '/');
 		while (path_words[i])
@@ -1023,11 +1061,10 @@ void	print_no_rights_err(t_in_file *head)
 		{
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
-			if (dont_print_error(path_words[i - 1]))
+			if (dont_print_error(path_words[i - 1]) && write(1, "\n", 1))
 				return ;
-			write(1, "\n", 1);
-			elem->pd ? ft_printf("%s:\nft_ls: ", elem->path) : 0;
-			ft_printf("%s: ", path_words[i - 1]);
+			elem->pd ? ft_printf("%s:\n", elem->path) : 0;
+			ft_printf("ft_ls: %s: ", path_words[i - 1]);
 			perror(0);
 		}
 		free_string_array(&path_words);
@@ -1089,7 +1126,7 @@ int		main(int argc, char **argv)
 		elem = elem->next;
 	}
 	elem = input.directories;
-	print_no_rights_err(elem);
+	print_no_rights_err_lst(elem);
 	free_input(input.directories);
 	return (0);
 }
