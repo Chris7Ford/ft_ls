@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/03 18:08:11 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/03 20:02:29 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,14 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 	i = 0;
 	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
 		i++;
-	if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_isalpha(n2.f_name[i]))
+	if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_isupper(n2.f_name[i]))
 		ret = 1;
-	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_isalpha(n1->f_name[i]))
+	else if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_islower(n2.f_name[i]))
 		ret = 0;
+	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_isupper(n1->f_name[i]))
+		ret = 0;
+	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_islower(n1->f_name[i]))
+		ret = 1;
 	else
 		ret =  (!((n1->f_name)[i] < n2.f_name[i]));
 	return (ret);
@@ -642,13 +646,8 @@ void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
 
 	if (!(*head) || !((*head)->next))
 		return ;
-	while (!complete)
+	while ((!complete) && (complete = 1))
 	{
-//		elem = *head;
-//		complete = 1;
-//		if (f(*head, (*head)->next) && swap_queue_head(head))
-//			elem = *head;
-		complete = 1;
 		if ((f(*head, (*head)->next) && swap_queue_head(head)) || 1)
 			elem = *head;
 		while (elem->next->next)
@@ -847,10 +846,21 @@ void	swap_input_head(t_in_file **head)
 	elem = *head;
 }
 
-int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
+void	swap_input_links(t_in_file *elem, int *complete)
 {
 	t_in_file	*other_temp;
 	t_in_file	*temp;
+
+	*complete = 0;
+	temp = elem->next->next->next;
+	other_temp = elem->next;
+	elem->next = elem->next->next;
+	elem->next->next = other_temp;
+	elem->next->next->next = temp;
+}
+
+int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
+{
 	t_in_file	*elem;
 	int			complete;
 	int			result;
@@ -868,14 +878,7 @@ int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
 			if (is_directory(elem->path) || is_directory(elem->next->path))
 				result = 0;
 			if (f(elem->next, elem->next->next))
-			{
-				complete = 0;
-				temp = elem->next->next->next;
-				other_temp = elem->next;
-				elem->next = elem->next->next;
-				elem->next->next = other_temp;
-				elem->next->next->next = temp;
-			}
+				swap_input_links(elem, &complete);
 			elem = elem->next;
 		}
 		elem = *head;
@@ -993,6 +996,14 @@ void	free_string_array(char ***array)
 	*array = 0;
 }
 
+int		dont_print_error(char *str)
+{
+	if (ft_strcmp(str, "usr") == 0)
+		return (1);
+	return (0);
+}
+
+
 void	print_no_rights_err(t_in_file *head)
 {
 	t_in_file		*elem;
@@ -1010,11 +1021,12 @@ void	print_no_rights_err(t_in_file *head)
 		directory = opendir(elem->path);
 		if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 		{
-			write(1, "\n", 1);
-			if (elem->pd)
-				ft_printf("%s:\nft_ls: ", elem->path);
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
+			if (dont_print_error(path_words[i - 1]))
+				return ;
+			write(1, "\n", 1);
+			elem->pd ? ft_printf("%s:\nft_ls: ", elem->path) : 0;
 			ft_printf("%s: ", path_words[i - 1]);
 			perror(0);
 		}

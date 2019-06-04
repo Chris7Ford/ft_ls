@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/11 18:04:30 by chford            #+#    #+#             */
-/*   Updated: 2019/05/26 09:17:16 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/03 19:35:11 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,6 @@ void	print_hex_ulong_length(unsigned long n, int *length);
 void	print_hex_ulong_fd(unsigned long n, int fd);
 void	ft_putstr_constrain_fd(char const *s, int constrain, int fd);
 char	*ft_strjoin_free(char **s1, char **s2, int free1, int free2);
-char	*ft_strjoin_char(char **s1, char c);
-int		count_words(char const *string, char c);
+int		ft_islower(char c);
+int		ft_isupper(char c);
 #endif
