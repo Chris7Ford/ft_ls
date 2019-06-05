@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/04 12:57:30 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 18:34:47 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ void							print_last_mod(t_f_node *node);
 void							print_long_file_info(t_f_node *node, t_input input);
 void							fill_file_type(t_info *current, struct stat buf);
 int								get_stat_info(t_info *current, char *f_name,
-								char *path, t_input *input);
+								char *path, t_input *input, int first);
 void							get_owner_info(t_info *current);
 void							get_group_info(t_info *current);
 int								get_sort_info(t_info *current, char *path);
@@ -177,9 +177,9 @@ int								recurse_me(char *directory, t_input input);
 void							reset_t_info(t_info *current);
 void							fill_dequeue_function(t_input *input);
 void							get_long_info(t_info *current,
-								char *directory_name, t_input *input);
+								char *directory_name, t_input *input, int first);
 void							get_file_info(t_info *current, t_input *input,
-								struct dirent *file, char *directory_name);
+								char *directory_name, char *filename, int first);
 void							handle_queue(t_q_link **queue,
 								char *directory_name, t_input *input);
 void							print_directory_name(char *directory_name);

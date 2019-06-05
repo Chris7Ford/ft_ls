@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/11 18:04:30 by chford            #+#    #+#             */
-/*   Updated: 2019/06/03 19:35:11 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 17:12:13 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,4 +95,7 @@ void	ft_putstr_constrain_fd(char const *s, int constrain, int fd);
 char	*ft_strjoin_free(char **s1, char **s2, int free1, int free2);
 int		ft_islower(char c);
 int		ft_isupper(char c);
+void	free_string_array(char ***array);
+char	*ft_join_str_array(char **tab, char glue);
+int		get_char_array_len(char **tab);
 #endif

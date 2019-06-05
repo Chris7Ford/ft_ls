@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/04 13:14:08 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/04 18:50:11 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,17 +93,30 @@ void	check_exists(t_in_file *elem)
 	}
 }
 
+int		sort_nanosec(long nsec1, long nsec2)
+{
+	return (nsec1 < nsec2);
+}
+
 int		sort_accessed(t_f_node *n1, t_info n2)
 {
 	if (n1->last_accessed.tv_sec == n2.last_accessed.tv_sec)
+	{
+		if (!(n1->last_accessed.tv_nsec == n2.last_accessed.tv_nsec))
+			return (sort_nanosec(n1->last_accessed.tv_nsec, n2.last_accessed.tv_nsec));
 		return (sort_alpha_node(n1, n2));
+	}
 	return (n1->last_accessed.tv_sec < n2.last_accessed.tv_sec);
 }
 
 int		sort_modified(t_f_node *n1, t_info n2)
 {
 	if (n1->last_modified.tv_sec == n2.last_modified.tv_sec)
+	{
+		if (!(n1->last_modified.tv_nsec == n2.last_modified.tv_nsec))
+			return (sort_nanosec(n1->last_modified.tv_nsec, n2.last_modified.tv_nsec));
 		return (sort_alpha_node(n1, n2));
+	}
 	return (n1->last_modified.tv_sec < n2.last_modified.tv_sec);
 }
 
@@ -419,17 +432,20 @@ void	fill_file_type(t_info *current, struct stat buf)
 		current->filetype = SYMLINK;
 }
 
-int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input)
+int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input, int first)
 {
 	struct stat		buf;
 	char			*temp;
 
-	if (lstat(f_name, &buf) == -1)
+//	if (lstat(f_name, &buf) == -1 || !first)
+	if (!first)
 	{
 		temp = file_to_path(path, current->f_name);
 		if (lstat(temp, &buf) == -1)
 			return (0);
 	}
+	else if (lstat(f_name, &buf) == -1)
+		return (0);
 	if (current->filetype & BLOCK_DEVICE || current->filetype & CHARACTER_DEVICE)
 	{
 		current->major = major(buf.st_rdev);
@@ -571,21 +587,20 @@ void		reset_t_info(t_info *current)
  	current->gid = 0;
 }
 
-void		get_long_info(t_info *current, char *directory_name, t_input *input)
+void		get_long_info(t_info *current, char *directory_name, t_input *input, int first)
 {	
-	get_stat_info(current, current->f_name, directory_name, input);
+	get_stat_info(current, current->f_name, directory_name, input, first);
 	get_owner_info(current);
 	get_group_info(current);
 }
 
-void		get_file_info(t_info *current, t_input *input,
-		struct dirent *file, char *directory_name)
+void		get_file_info(t_info *current, t_input *input, char *directory_name, char *filename, int first)
 {
 	reset_t_info(current);
-	current->f_name = ft_strdup(file->d_name);
+	current->f_name = ft_strdup(filename);
 	get_sort_info(current, directory_name);
 	if (input->flags & _L)
-		get_long_info(current, directory_name, input);
+		get_long_info(current, directory_name, input, first);
 }
 
 void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
@@ -638,7 +653,7 @@ int		swap_queue_head(t_q_link **head)
 	return (1);
 }
 
-void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
+/*void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
 {
 	t_q_link	*elem;
 	t_q_link	*temp;
@@ -666,7 +681,7 @@ void		sort_queue(t_q_link **head, int (*f)(t_q_link *n1, t_q_link *n2))
 		}
 	}
 }
-
+*/
 void		free_in_file(t_in_file *head)
 {
 	if (!head)
@@ -700,14 +715,17 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	first ? 0 : print_directory_name(directory_name);
 	while ((file = readdir(directory)))
 	{
-		get_file_info(&current, input, file, directory_name);
+//		if (!first && (ft_strcmp(file->d_name, ".") == 0 || ft_strcmp(file->d_name, "..") == 0))
+//			get_correct_file_from_dot(file->d_name, directory_name, input);
+			///Working here. I want to replace . or .. with the correct directory from each recursion call. I need to pass the right path into stat instead of . or .., but keep . or .. as the filename
+		get_file_info(&current, input, directory_name, file->d_name, first);
 		insert_node(&head, current, input->sort);
-		/////// push the queue from the traversal function so that we don't have to sort it in different ways...
 	}
 	(void)closedir(directory);
 	input->flags & _L ? ft_printf("total %d\n", input->size) : 0;
 	input->for_each_node(head, *input, &queue);
 	free_tree(head);
+	//I think sort queue can go altogether
 //	sort_queue(&queue, filter_directory_queue);
 	while (input->flags & _CR && queue)
 		handle_queue(&queue, directory_name, input);
@@ -970,7 +988,7 @@ void	print_single_file(char *path, t_input input)
 		queue = 0;
 		current.f_name = ft_strdup(path);
 		get_sort_info(&current, path);
-		get_stat_info(&current, path, "00", &input);
+		get_stat_info(&current, path, "00", &input, 1);
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
@@ -989,17 +1007,6 @@ void	free_input(t_in_file *file)
 		free_input(file->next);
 	free(file->path);
 	free(file);
-}
-
-void	free_string_array(char ***array)
-{
-	int		i;
-
-	i = 0;
-	while ((*array)[i])
-		free((*array)[i++]);
-	free(*array);
-	*array = 0;
 }
 
 int		dont_print_error(char *str)
