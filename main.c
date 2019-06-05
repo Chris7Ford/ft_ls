@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 06:32:50 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 07:20:08 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,9 @@ int		sort_modified(t_f_node *n1, t_info n2)
 
 int		do_not_sort(t_f_node *n1, t_info n2)
 {
+	if ((ft_strcmp(n2.f_name, ".") == 0 /*&& ft_strcmp(n2.f_name, "..")) */) ||
+			(ft_strcmp(n2.f_name, "..") == 0 && ft_strcmp(n1->f_name, ".")))
+				return (1);
 	return (0);
 }
 
@@ -798,7 +801,11 @@ void	overwrite_ls_flags(t_input *input)
 	if (input->flags & _F && input->flags & _T)
 		input->flags -= _T;
 	if (input->flags & _F)
+	{
 		input->flags |= _A;
+		if (input->flags & _R)
+			input->flags -= _R;
+	}
 }
 
 t_in_file	*create_in_file_node(char *path, int is_dir, int pd)
