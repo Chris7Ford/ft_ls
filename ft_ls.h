@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/04 18:34:47 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 05:50:16 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int								get_stat_info(t_info *current, char *f_name,
 								char *path, t_input *input, int first);
 void							get_owner_info(t_info *current);
 void							get_group_info(t_info *current);
-int								get_sort_info(t_info *current, char *path);
+int								get_sort_info(t_info *current, char *path, int first);
 t_q_link						*create_link(char *str);
 void							push_queue(char *name, t_q_link **head);
 t_q_link						*pop_queue(t_q_link **head);

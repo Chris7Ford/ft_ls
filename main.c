@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/04 18:50:11 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 05:52:32 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -480,17 +480,20 @@ void	get_group_info(t_info *current)
 	current->groupname = ft_strdup(grp->gr_name);
 }
 
-int		get_sort_info(t_info *current, char *path)
+int		get_sort_info(t_info *current, char *path, int first)
 {
 	struct stat		buf;
 	char			*temp;
 
-	if (lstat(current->f_name, &buf) == -1)
+//	if (lstat(current->f_name, &buf) == -1)
+	if (!first)
 	{
 		temp = file_to_path(path, current->f_name);
 		lstat(temp, &buf);
 		free(temp);
 	}
+	else
+		lstat(current->f_name, &buf);
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->last_accessed = buf.st_atimespec;
@@ -598,7 +601,7 @@ void		get_file_info(t_info *current, t_input *input, char *directory_name, char 
 {
 	reset_t_info(current);
 	current->f_name = ft_strdup(filename);
-	get_sort_info(current, directory_name);
+	get_sort_info(current, directory_name, first);
 	if (input->flags & _L)
 		get_long_info(current, directory_name, input, first);
 }
@@ -987,7 +990,7 @@ void	print_single_file(char *path, t_input input)
 		head = 0;
 		queue = 0;
 		current.f_name = ft_strdup(path);
-		get_sort_info(&current, path);
+		get_sort_info(&current, path, 1);
 		get_stat_info(&current, path, "00", &input, 1);
 		get_owner_info(&current);
 		get_group_info(&current);
