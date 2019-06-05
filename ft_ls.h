@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 05:50:16 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 06:25:28 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,8 +120,8 @@ struct							s_input
 	t_in_file					*local_err;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input,
-								t_q_link **queue);
-	void						(*file_print)(t_f_node *node, t_input input);
+								t_q_link **queue, char *path);
+	void						(*file_print)(t_f_node *node, t_input input, char *path);
 	void						(*q_sort)(t_q_link *n1, t_q_link *n2);
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
@@ -138,8 +138,8 @@ void							check_exists(t_in_file *elem);
 int								sort_accessed(t_f_node *n1, t_info n2);
 int								sort_modified(t_f_node *n1, t_info n2);
 int								do_not_sort(t_f_node *n1, t_info n2);
-void							print_link_file(t_f_node *node);
-void							print_filename(t_f_node *node, t_input input);
+void							print_link_file(t_f_node *node, char *path);
+void							print_filename(t_f_node *node, t_input input, char *path);
 char							*file_to_path(char *path, char *file);
 t_f_node						*create_node(t_info info);
 void							traverse_nodes_to_get_length(t_f_node *node,
@@ -154,15 +154,15 @@ void							traverse_nodes_to_insert(t_f_node **orig, t_info info,
 void							insert_node(t_f_node **head, t_info info,
 								int (*cmp)(t_f_node*, t_info));
 void							inorder_traversal_apply(t_f_node *elem, t_input input,
-								t_q_link **queue);
+								t_q_link **queue, char *path);
 void							reverse_inorder_traversal_apply(t_f_node *elem,
-								t_input input, t_q_link **queue);
+								t_input input, t_q_link **queue, char *path);
 void							fill_permissions(t_info *current, int st_mode);
 void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
 void							print_last_mod(t_f_node *node);
-void							print_long_file_info(t_f_node *node, t_input input);
+void							print_long_file_info(t_f_node *node, t_input input, char *path);
 void							fill_file_type(t_info *current, struct stat buf);
 int								get_stat_info(t_info *current, char *f_name,
 								char *path, t_input *input, int first);

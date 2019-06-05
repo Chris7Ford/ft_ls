@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 05:52:32 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 06:32:50 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,13 +53,13 @@ int		sort_alpha_node(t_f_node *n1, t_info n2)
 	i = 0;
 	while ((n1->f_name)[i] == n2.f_name[i] && (n1->f_name)[i] != '\0')
 		i++;
-	if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_isupper(n2.f_name[i]))
+	if (ft_isalnum(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_isupper(n2.f_name[i]))
 		ret = 1;
-	else if (ft_isalpha(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_islower(n2.f_name[i]))
+	else if (ft_isalnum(n1->f_name[i]) == 0 && n1->f_name[i] != '.' && ft_islower(n2.f_name[i]))
 		ret = 0;
-	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_isupper(n1->f_name[i]))
+	else if (ft_isalnum(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_isupper(n1->f_name[i]))
 		ret = 0;
-	else if (ft_isalpha(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_islower(n1->f_name[i]))
+	else if (ft_isalnum(n2.f_name[i]) == 0 && n2.f_name[i] != '.' && ft_islower(n1->f_name[i]))
 		ret = 1;
 	else
 		ret =  (!((n1->f_name)[i] < n2.f_name[i]));
@@ -125,27 +125,30 @@ int		do_not_sort(t_f_node *n1, t_info n2)
 	return (0);
 }
 
-void	print_link_file(t_f_node *node)
+void	print_link_file(t_f_node *node, char *path)
 {
+	char	*temp;
 	char	buffer[4097];
 	int		count;
 
-	count = readlink(node->f_name, buffer, sizeof(buffer));
+	temp = file_to_path(path, node->f_name);
+	count = readlink(temp, buffer, sizeof(buffer));
 	if (count >= 0)
 	{
 		buffer[count] = '\0';
 		write(1, " -> ", 4);
 		write(1, buffer, ft_strlen(buffer));
 	}
+	free(temp);
 }
 
-void	print_filename(t_f_node *node, t_input input)
+void	print_filename(t_f_node *node, t_input input, char *path)
 {
 	if (input.show_hidden || !(node->hidden))
 	{
 		write(1, node->f_name, ft_strlen(node->f_name));
 		if (node->is_link && input.flags & _L)
-			print_link_file(node);
+			print_link_file(node, path);
 		ft_putchar('\n');
 	}
 }
@@ -289,29 +292,29 @@ void	insert_node(t_f_node **head, t_info info, int (*cmp)(t_f_node*, t_info))
 		traverse_nodes_to_insert(head, info, cmp);
 }
 
-void	inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue)
+void	inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue, char *path)
 {
 	if (elem->left)
-		inorder_traversal_apply(elem->left, input, queue);
-	input.file_print(elem, input);
+		inorder_traversal_apply(elem->left, input, queue, path);
+	input.file_print(elem, input, path);
 	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
 		//This function will have to change to get the information from the node, not current...
 		push_queue(elem->f_name, queue);
 	if (elem->right)
-		inorder_traversal_apply(elem->right, input, queue);
+		inorder_traversal_apply(elem->right, input, queue, path);
 }
 
-void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue)
+void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue, char *path)
 {
 	if (elem->right)
-		reverse_inorder_traversal_apply(elem->right, input, queue);
-	input.file_print(elem, input);
+		reverse_inorder_traversal_apply(elem->right, input, queue, path);
+	input.file_print(elem, input, path);
 	
 	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
 		//This function will have to change to get the information from the node, not current...
 		push_queue(elem->f_name, queue);
 	if (elem->left)
-		reverse_inorder_traversal_apply(elem->left, input, queue);
+		reverse_inorder_traversal_apply(elem->left, input, queue, path);
 }
 
 void	fill_permissions(t_info *current, int st_mode)
@@ -392,7 +395,7 @@ void	print_last_mod(t_f_node *node)
 	write(1, " ", 1);
 }
 
-void	print_long_file_info(t_f_node *node, t_input input)
+void	print_long_file_info(t_f_node *node, t_input input, char *path)
 {
 	long		time;
 
@@ -412,7 +415,7 @@ void	print_long_file_info(t_f_node *node, t_input input)
 		else
 		ft_printf("%7d ", node->size);
 		print_last_mod(node);
-		print_filename(node, input);
+		print_filename(node, input, path);
 	}
 }
 
@@ -437,15 +440,15 @@ int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input, in
 	struct stat		buf;
 	char			*temp;
 
-//	if (lstat(f_name, &buf) == -1 || !first)
-	if (!first)
+	if (lstat(f_name, &buf) == -1 || !first)
+//	if (!first)
 	{
 		temp = file_to_path(path, current->f_name);
 		if (lstat(temp, &buf) == -1)
 			return (0);
 	}
-	else if (lstat(f_name, &buf) == -1)
-		return (0);
+//	else if (lstat(f_name, &buf) == -1)
+//		return (0);
 	if (current->filetype & BLOCK_DEVICE || current->filetype & CHARACTER_DEVICE)
 	{
 		current->major = major(buf.st_rdev);
@@ -485,15 +488,14 @@ int		get_sort_info(t_info *current, char *path, int first)
 	struct stat		buf;
 	char			*temp;
 
-//	if (lstat(current->f_name, &buf) == -1)
-	if (!first)
+	if (lstat(current->f_name, &buf) == -1 || !first)
 	{
 		temp = file_to_path(path, current->f_name);
 		lstat(temp, &buf);
 		free(temp);
 	}
-	else
-		lstat(current->f_name, &buf);
+//	else
+//		lstat(current->f_name, &buf);
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->last_accessed = buf.st_atimespec;
@@ -726,7 +728,7 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	}
 	(void)closedir(directory);
 	input->flags & _L ? ft_printf("total %d\n", input->size) : 0;
-	input->for_each_node(head, *input, &queue);
+	input->for_each_node(head, *input, &queue, directory_name);
 	free_tree(head);
 	//I think sort queue can go altogether
 //	sort_queue(&queue, filter_directory_queue);
@@ -996,7 +998,7 @@ void	print_single_file(char *path, t_input input)
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
 		//input.for_each_node(head, input, input.file_print);
-		input.for_each_node(head, input, &queue);
+		input.for_each_node(head, input, &queue, path);
 
 		free_tree(head);
 	}
