@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 07:20:08 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 07:28:06 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ int		sort_modified(t_f_node *n1, t_info n2)
 
 int		do_not_sort(t_f_node *n1, t_info n2)
 {
-	if ((ft_strcmp(n2.f_name, ".") == 0 /*&& ft_strcmp(n2.f_name, "..")) */) ||
+	if ((ft_strcmp(n2.f_name, ".") == 0) ||
 			(ft_strcmp(n2.f_name, "..") == 0 && ft_strcmp(n1->f_name, ".")))
 				return (1);
 	return (0);
@@ -301,7 +301,6 @@ void	inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **queue, ch
 		inorder_traversal_apply(elem->left, input, queue, path);
 	input.file_print(elem, input, path);
 	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
-		//This function will have to change to get the information from the node, not current...
 		push_queue(elem->f_name, queue);
 	if (elem->right)
 		inorder_traversal_apply(elem->right, input, queue, path);
@@ -314,7 +313,6 @@ void	reverse_inorder_traversal_apply(t_f_node *elem, t_input input, t_q_link **q
 	input.file_print(elem, input, path);
 	
 	if (input.flags & _CR && elem->filetype & DIRECTORY && recurse_me(elem->f_name, input))
-		//This function will have to change to get the information from the node, not current...
 		push_queue(elem->f_name, queue);
 	if (elem->left)
 		reverse_inorder_traversal_apply(elem->left, input, queue, path);
@@ -444,14 +442,11 @@ int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input, in
 	char			*temp;
 
 	if (lstat(f_name, &buf) == -1 || !first)
-//	if (!first)
 	{
 		temp = file_to_path(path, current->f_name);
 		if (lstat(temp, &buf) == -1)
 			return (0);
 	}
-//	else if (lstat(f_name, &buf) == -1)
-//		return (0);
 	if (current->filetype & BLOCK_DEVICE || current->filetype & CHARACTER_DEVICE)
 	{
 		current->major = major(buf.st_rdev);
@@ -497,8 +492,6 @@ int		get_sort_info(t_info *current, char *path, int first)
 		lstat(temp, &buf);
 		free(temp);
 	}
-//	else
-//		lstat(current->f_name, &buf);
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->last_accessed = buf.st_atimespec;
@@ -534,7 +527,7 @@ void		push_queue(char *name, t_q_link **head)
 	link->next = create_link(name);
 }
 
-t_q_link		*pop_queue(t_q_link **head)
+/*t_q_link		*pop_queue(t_q_link **head)
 {
 	t_q_link	*temp;
 	t_q_link	*other_temp;
@@ -560,7 +553,7 @@ t_q_link		*pop_queue(t_q_link **head)
 	}
 	return (temp);
 }
-
+*/
 t_q_link		*unshift_queue(t_q_link **head)
 {
 	t_q_link	*temp;
@@ -723,9 +716,6 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 	first ? 0 : print_directory_name(directory_name);
 	while ((file = readdir(directory)))
 	{
-//		if (!first && (ft_strcmp(file->d_name, ".") == 0 || ft_strcmp(file->d_name, "..") == 0))
-//			get_correct_file_from_dot(file->d_name, directory_name, input);
-			///Working here. I want to replace . or .. with the correct directory from each recursion call. I need to pass the right path into stat instead of . or .., but keep . or .. as the filename
 		get_file_info(&current, input, directory_name, file->d_name, first);
 		insert_node(&head, current, input->sort);
 	}
@@ -749,6 +739,12 @@ void	free_tree(t_f_node *head)
 	free(head->username);
 	free(head->groupname);
 	free(head);
+}
+
+void	exit_error()
+{
+	ft_putstr("usage: ft_ls [-Radfglrtuy] [file ...]\n");
+	exit(0);
 }
 
 void	add_flag(t_input *input, char c)
@@ -776,10 +772,7 @@ void	add_flag(t_input *input, char c)
 	else if (c == 'z')
 		input->flags = input->flags | _Z;
 	else
-	{
-		ft_putstr("usage: ft_ls [-Radfglrtuy] [file ...]\n");
-		exit(0);
-	}
+		exit_error();
 }
 
 int		parse_flag(t_input *input, char *str)
@@ -1004,7 +997,6 @@ void	print_single_file(char *path, t_input input)
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
-		//input.for_each_node(head, input, input.file_print);
 		input.for_each_node(head, input, &queue, path);
 
 		free_tree(head);
