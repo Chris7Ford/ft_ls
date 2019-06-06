@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:27:30 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 19:07:09 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 08:54:55 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_in_file	*create_in_file_node(char *path, int is_dir, int pd)
 	return (elem);
 }
 
-int		push_input_file(t_in_file **head, char *path, int is_dir, int pd)
+int			push_input_file(t_in_file **head, char *path, int is_dir, int pd)
 {
 	t_in_file	*temp;
 
@@ -45,7 +45,7 @@ int		push_input_file(t_in_file **head, char *path, int is_dir, int pd)
 	return (1);
 }
 
-void	swap_input_head(t_in_file **head)
+void		swap_input_head(t_in_file **head)
 {
 	t_in_file	*elem;
 	t_in_file	*temp;
@@ -58,7 +58,7 @@ void	swap_input_head(t_in_file **head)
 	elem = *head;
 }
 
-void	swap_input_links(t_in_file *elem, int *complete)
+void		swap_input_links(t_in_file *elem, int *complete)
 {
 	t_in_file	*other_temp;
 	t_in_file	*temp;
@@ -71,7 +71,8 @@ void	swap_input_links(t_in_file *elem, int *complete)
 	elem->next->next->next = temp;
 }
 
-int		bubble_sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
+int			bubble_sort_input(t_in_file **head,
+		int (*f)(t_in_file *n1, t_in_file *n2))
 {
 	t_in_file	*elem;
 	int			complete;

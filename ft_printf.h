@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/16 18:10:51 by chford            #+#    #+#             */
-/*   Updated: 2019/05/16 12:48:31 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:08:36 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,8 @@ void							check_minus_and_zero(t_format *variable);
 void							get_hex_length(unsigned long long n,
 								int *length);
 void							print_hex(unsigned long long n, int c, int fd);
-int								get_diouxx_return(t_format var, int length, int neg);
+int								get_diouxx_return(t_format var,
+								int length, int neg);
 void							cast_hex(t_format variable, int fd);
 void							add_hex_prefix(t_format *variable,
 								int fd, int *length);
@@ -140,7 +141,7 @@ char							*ft_str_swap_length(char *str1, char *large,
 int								check_f_edge(t_format var, int exponent,
 								char *mantissa, int fd);
 char							*divide_by_two(char *input, char *temp);
-void							print_padding(t_format variable, 
+void							print_padding(t_format variable,
 								int length, int neg);
 char							*divide_string_cm(int mult, char **input);
 char							*ft_strjoin_char(char **s1, char c);
@@ -178,9 +179,12 @@ int								printp(t_format var, int fd);
 int								handle_variable(char **str,
 								int fd, va_list list);
 int								printpercent(t_format var, int fd);
-void							rearrange_float_prefix(t_format var, char *answer);
-int								print_float_string(t_format var, char **answer, int fd);
-int								get_used_length(t_format variable, int length, int neg);
-void							get_diouxx2(va_list, t_format *variable);
+void							rearrange_float_prefix(t_format var,
+								char *answer);
+int								print_float_string(t_format var,
+								char **answer, int fd);
+int								get_used_length(t_format variable,
+								int length, int neg);
+void							get_diouxx2(va_list list, t_format *variable);
 int								d_only_zero(t_format var, int fd);
 #endif

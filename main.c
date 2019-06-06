@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 19:07:30 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:24:18 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,8 @@ int		main(int argc, char **argv)
 	int			result;
 	int			i;
 
-	init_input(&input);
-	reset_t_info(&current);
+	init_input(&input, &current);
 	get_input_info(&input, argc, argv);
-	input.show_hidden = input.flags & _A ? 1 : 0;
 	assign_input_functions(&input);
 	i = 0;
 	result = sort_input(&(input.directories), files_first_alpha);

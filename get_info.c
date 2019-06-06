@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:16:58 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:18:34 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:48:13 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,18 +28,20 @@ void	fill_file_type(t_info *current, struct stat buf)
 		current->filetype = SYMLINK;
 }
 
-int		get_stat_info(t_info *current, char *f_name, char *path, t_input *input, int first)
+int		get_stat_info(t_info *current, char *path,
+		t_input *input, int first)
 {
 	struct stat		buf;
 	char			*temp;
 
-	if (lstat(f_name, &buf) == -1 || !first)
+	if (lstat(current->f_name, &buf) == -1 || !first)
 	{
 		temp = file_to_path(path, current->f_name);
 		if (lstat(temp, &buf) == -1)
 			return (0);
 	}
-	if (current->filetype & BLOCK_DEVICE || current->filetype & CHARACTER_DEVICE)
+	if (current->filetype & BLOCK_DEVICE ||
+			current->filetype & CHARACTER_DEVICE)
 	{
 		current->major = major(buf.st_rdev);
 		current->minor = minor(buf.st_rdev);

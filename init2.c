@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:28:42 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:44:09 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:07:04 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void		get_input_info(t_input *input, int argc, char **argv)
 		push_input_file(&(input->directories), ".", 1, 0);
 }
 
-void	assign_sorting_function(t_input *input)
+void		assign_sorting_function(t_input *input)
 {
 	if (input->flags & _T)
 		input->sort = sort_modified;
@@ -52,7 +52,7 @@ void	assign_sorting_function(t_input *input)
 		input->sort = sort_alpha_node;
 }
 
-void	assign_print_function(t_input *input)
+void		assign_print_function(t_input *input)
 {
 	if (input->flags & _L)
 		input->file_print = print_long_file_info;
@@ -60,7 +60,7 @@ void	assign_print_function(t_input *input)
 		input->file_print = print_filename;
 }
 
-void	free_queue(t_q_link *queue)
+void		free_queue(t_q_link *queue)
 {
 	if (queue->next)
 		free_queue(queue->next);

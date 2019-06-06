@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/13 16:53:43 by chford            #+#    #+#             */
-/*   Updated: 2019/05/23 15:24:30 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:20:49 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 char	*ft_strjoin_char(char **s1, char c)
 {
-	int			 i;
 	char	*string;
+	int		i;
 
 	i = 0;
 	string = (char *)malloc(sizeof(char) * (ft_strlen(*s1) + 2));

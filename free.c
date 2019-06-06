@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:23:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:29:23 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:12:19 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	free_input(t_in_file *file)
 	free(file);
 }
 
-void		free_in_file(t_in_file *head)
+void	free_in_file(t_in_file *head)
 {
 	if (!head)
 		return ;

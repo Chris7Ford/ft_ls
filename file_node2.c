@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:14:50 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:15:03 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:07:20 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ void	handle_left_tree_inbalance(t_f_node **grand)
 	*grand = right_rotate(*grand);
 }
 
-void	traverse_nodes_to_insert(t_f_node **orig, t_info info, int (*cmp)(t_f_node*, t_info))
+void	traverse_nodes_to_insert(t_f_node **orig,
+		t_info info, int (*cmp)(t_f_node*, t_info))
 {
 	int		lenl;
 	int		lenr;

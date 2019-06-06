@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:10:06 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:50:05 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:00:04 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,12 @@ int		recurse_me(char *directory, t_input input)
 	return (0);
 }
 
-int			check_edge(char *path, int first)
+int		check_edge(char *path, int first)
 {
 	if (ft_strncmp(path, "/d", 2) == 0)
 	{
-		if (ft_strcmp(path, "/dev/fd/3") == 0 || ft_strcmp(path, "/dev/fd/3/") == 0)
+		if (ft_strcmp(path, "/dev/fd/3") == 0 ||
+				ft_strcmp(path, "/dev/fd/3/") == 0)
 		{
 			if (!first)
 				write(1, "\n/dev/fd/3:\nft_ls: 3: Not a directory\n", 39);
@@ -43,7 +44,8 @@ int			check_edge(char *path, int first)
 				write(1, "ft_ls: /dev/fd/3: Bad file descriptor\n", 38);
 			return (1);
 		}
-		else if (ft_strcmp(path, "/dev/fd/4") == 0 || ft_strcmp(path, "/dev/fd/4/") == 0)
+		else if (ft_strcmp(path, "/dev/fd/4") == 0 ||
+				ft_strcmp(path, "/dev/fd/4/") == 0)
 		{
 			if (!first)
 				write(1, "ft_ls: 4: directory causes a cycle\n", 36);
@@ -58,7 +60,7 @@ int			check_edge(char *path, int first)
 void	check_exists(t_in_file *elem)
 {
 	struct stat	details;
-	DIR				*directory;
+	DIR			*directory;
 
 	directory = opendir(elem->path);
 	if (stat(elem->path, &details) == -1 || !directory)

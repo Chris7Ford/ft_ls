@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:20:08 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:54:40 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:01:19 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ t_q_link	*create_link(char *str)
 	return (new);
 }
 
-int		swap_queue_head(t_q_link **head)
+int			swap_queue_head(t_q_link **head)
 {
 	t_q_link	*elem;
 	t_q_link	*temp;
@@ -65,7 +65,7 @@ void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 	free(tmp);
 }
 
-t_q_link		*unshift_queue(t_q_link **head)
+t_q_link	*unshift_queue(t_q_link **head)
 {
 	t_q_link	*temp;
 

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:14:08 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:14:24 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 09:11:17 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ t_f_node	*create_node(t_info info)
 	return (node);
 }
 
-void	traverse_nodes_to_get_length(t_f_node *node, int current, int *max)
+void		traverse_nodes_to_get_length(t_f_node *node, int current, int *max)
 {
 	if (current > *max)
 		*max = current;
@@ -48,7 +48,7 @@ void	traverse_nodes_to_get_length(t_f_node *node, int current, int *max)
 	return ;
 }
 
-int		get_max_length_node(t_f_node *node)
+int			get_max_length_node(t_f_node *node)
 {
 	int		max;
 
