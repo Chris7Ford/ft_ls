@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 17:02:56 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 17:52:55 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ void	check_exists(t_in_file *elem)
 		if (errno == 2 || errno == 13)
 			elem->error = errno;
 	}
+	if (directory)
+		(void)closedir(directory);
 }
 
 int		sort_nanosec(long nsec1, long nsec2)
@@ -610,9 +612,12 @@ void		get_file_info(t_info *current, t_input *input, char *directory_name, char 
 void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 {
 	t_q_link		*tmp;
+	char			*c_temp;
 
 	tmp = input->dequeue(queue);
+	c_temp = tmp->directory;
 	tmp->directory = file_to_path(directory_name, tmp->directory);
+	free(c_temp);
 	get_directory(tmp->directory, input, tmp->info, 0);
 	free(tmp->directory);
 	free(tmp);
@@ -1057,13 +1062,13 @@ void	print_no_rights_err_str(char *path, int pd)
 {
 	char			**path_words;
 	int				i;
-	DIR				*directory;
+//	DIR				*directory;
 
 	i = 0;
 	path_words = ft_strsplit(path, '/');
 	while (path_words[i])
 		i++;
-	directory = opendir(path);
+//	directory = opendir(path);
 	if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 	{
 		while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
@@ -1083,7 +1088,7 @@ void	print_no_rights_err_lst(t_in_file *head)
 	t_in_file		*elem;
 	char			**path_words;
 	int				i;
-	DIR				*directory;
+//	DIR				*directory;
 
 	elem = head;
 	while (elem && !(i = 0))
@@ -1091,7 +1096,7 @@ void	print_no_rights_err_lst(t_in_file *head)
 		path_words = ft_strsplit(elem->path, '/');
 		while (path_words[i])
 			i++;
-		directory = opendir(elem->path);
+//		directory = opendir(elem->path);
 		if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 		{
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
@@ -1156,6 +1161,7 @@ int		main(int argc, char **argv)
 
 	init_input(&input);
 	get_input_info(&input, argc, argv);
+	input.show_hidden = input.flags & _A ? 1 : 0;
 	assign_input_functions(&input);
 	i = 0;
 	result = sort_input(&(input.directories), files_first_alpha);
