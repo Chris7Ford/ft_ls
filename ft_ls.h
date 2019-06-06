@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 06:25:28 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 16:07:42 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 # include <errno.h>
 # include <stdio.h>
 # include "ft_printf.h"
-#include "libft/libft.h"
+# include "libft/libft.h"
 
 # define BLOCK_DEVICE 			1
 # define CHARACTER_DEVICE	 	2
@@ -78,7 +78,7 @@ struct							s_info
 {
 	struct timespec				last_modified;
 	struct timespec				last_accessed;
-	unsigned int				device_detected;
+//	unsigned int				device_detected;
 	unsigned int				filetype : 7;
 	unsigned int				hidden : 1;
 	unsigned int				major;
@@ -117,12 +117,12 @@ struct							s_input
 {
 	unsigned int				flags : 11;
 	t_in_file					*directories;
-	t_in_file					*local_err;
+//	t_in_file					*local_err;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input,
 								t_q_link **queue, char *path);
 	void						(*file_print)(t_f_node *node, t_input input, char *path);
-	void						(*q_sort)(t_q_link *n1, t_q_link *n2);
+//	void						(*q_sort)(t_q_link *n1, t_q_link *n2);
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 07:28:06 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 17:02:56 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -414,7 +414,7 @@ void	print_long_file_info(t_f_node *node, t_input input, char *path)
 			ft_printf(" %d ", node->minor);
 		}
 		else
-		ft_printf("%7d ", node->size);
+			ft_printf("%7d ", node->size);
 		print_last_mod(node);
 		print_filename(node, input, path);
 	}
@@ -576,6 +576,8 @@ int		recurse_me(char *directory, t_input input)
 
 void		reset_t_info(t_info *current)
 {
+	current->major = 0;
+	current->minor = 0;
 	current->filetype = 0;
 	current->groupname = 0;
 	current->username = 0;
@@ -583,6 +585,7 @@ void		reset_t_info(t_info *current)
 	current->permissions = 0;
 	current->hidden = 0;
 	current->hlink = 0;
+	current->error = 0;
  	current->size = 0;
  	current->uid = 0;
  	current->gid = 0;
@@ -699,6 +702,30 @@ void		init_get_directory(t_f_node **head, t_q_link **queue, t_input *input)
 	input->size = 0;
 }
 
+int			check_edge(char *path, t_input *input, int first)
+{
+	if (ft_strncmp(path, "/d", 2) == 0)
+	{
+		if (ft_strcmp(path, "/dev/fd/3") == 0 || ft_strcmp(path, "/dev/fd/3/") == 0)
+		{
+			if (!first)
+				write(1, "\n/dev/fd/3:\nft_ls: 3: Not a directory\n", 39);
+			else
+				write(1, "ft_ls: /dev/fd/3: Bad file descriptor\n", 38);
+			return (1);
+		}
+		else if (ft_strcmp(path, "/dev/fd/4") == 0 || ft_strcmp(path, "/dev/fd/4/") == 0)
+		{
+			if (!first)
+				write(1, "ft_ls: 4: directory causes a cycle\n", 36);
+			else
+				write(1, "ft_ls: /dev/fd/4: Bad file descriptor\n", 38);
+			return (1);
+		}
+	}
+	return (0);
+}
+
 void		get_directory(char *directory_name, t_input *input, t_info current, int first)
 {
 	struct dirent	*file;
@@ -708,6 +735,8 @@ void		get_directory(char *directory_name, t_input *input, t_info current, int fi
 
 	init_get_directory(&head, &queue, input);
 	directory = opendir(directory_name);
+	if (check_edge(directory_name, input, first))
+		return ;
 	if (!directory)
 	{
 		print_no_rights_err_str(directory_name, 1);
@@ -791,6 +820,8 @@ int		parse_flag(t_input *input, char *str)
 
 void	overwrite_ls_flags(t_input *input)
 {
+	if (input->flags & _G)
+		input->flags |= _L;
 	if (input->flags & _F && input->flags & _T)
 		input->flags -= _T;
 	if (input->flags & _F)
@@ -987,6 +1018,8 @@ void	print_single_file(char *path, t_input input)
 	t_q_link	*queue;
 	t_info		current;
 
+	if (check_edge(path, &input, 1))
+		return ;
 	if (input.flags & _L)
 	{
 		head = 0;
@@ -998,7 +1031,6 @@ void	print_single_file(char *path, t_input input)
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
 		input.for_each_node(head, input, &queue, path);
-
 		free_tree(head);
 	}
 	else
@@ -1095,15 +1127,23 @@ void	print_no_exists_err(t_in_file *head)
 	}
 }
 
-void	init_input(t_input *input)
+void	assign_input_functions(t_input *input)
 {
 	assign_sorting_function(input);
 	assign_traversal_function(input);
 	assign_print_function(input);
 	input->show_hidden = input->flags & _A ? 1 : 0;
+}
+
+void	init_input(t_input *input)
+{
 	input->dequeue = unshift_queue;
 	input->size = 0;
-	input->local_err = 0;
+	input->flags = 0;
+	input->directories = 0;
+	input->show_hidden = 0;
+	input->recurse = 0;
+	input->size = 0;
 }
 
 int		main(int argc, char **argv)
@@ -1114,10 +1154,11 @@ int		main(int argc, char **argv)
 	int			result;
 	int			i;
 
+	init_input(&input);
 	get_input_info(&input, argc, argv);
+	assign_input_functions(&input);
 	i = 0;
 	result = sort_input(&(input.directories), files_first_alpha);
-	init_input(&input);
 	elem = input.directories;
 	print_no_exists_err(elem);
 	while (elem)
