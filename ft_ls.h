@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:08:27 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 18:45:35 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,7 @@ int								swap_queue_head(t_q_link **head);
 void							free_in_file(t_in_file *head);
 void							init_get_directory(t_f_node **head,
 								t_q_link **queue, t_input *input);
-int								check_edge(char *path, t_input *input, int first);
+int								check_edge(char *path, int first);
 void							get_directory(char *directory_name, t_input *input,
 								t_info current, int first);
 void							free_tree(t_f_node *head);

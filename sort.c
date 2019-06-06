@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 17:56:13 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 17:56:36 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 18:10:41 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,9 @@ int		sort_directories_first_node(t_f_node *n1, t_info n2)
 	if (is_directory(n2.f_name))
 		return (1);
 	return (sort_alpha(n1->f_name, n2.f_name));
+}
+
+int		sort_nanosec(long nsec1, long nsec2)
+{
+	return (nsec1 < nsec2);
 }
