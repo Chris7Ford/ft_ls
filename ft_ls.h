@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 16:07:42 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/05 18:08:27 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,17 +129,20 @@ struct							s_input
 	int							size;
 };
 
-int								is_directory(char *path);
+
 int								sort_alpha(char *str1, char *str2);
 int								sort_length_node(t_f_node *n1, t_info n2);
 int								sort_alpha_node(t_f_node *n1, t_info n2);
 int								sort_directories_first_node(t_f_node *n1, t_info n2);
+int								is_directory(char *path);
 void							check_exists(t_in_file *elem);
+int								sort_nanosec(long nsec1, long nsec2);
 int								sort_accessed(t_f_node *n1, t_info n2);
 int								sort_modified(t_f_node *n1, t_info n2);
 int								do_not_sort(t_f_node *n1, t_info n2);
 void							print_link_file(t_f_node *node, char *path);
-void							print_filename(t_f_node *node, t_input input, char *path);
+void							print_filename(t_f_node *node,
+								t_input input, char *path);
 char							*file_to_path(char *path, char *file);
 t_f_node						*create_node(t_info info);
 void							traverse_nodes_to_get_length(t_f_node *node,
@@ -162,7 +165,8 @@ void							print_permission_each(int n);
 void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
 void							print_last_mod(t_f_node *node);
-void							print_long_file_info(t_f_node *node, t_input input, char *path);
+void							print_long_file_info(t_f_node *node,
+								t_input input, char *path);
 void							fill_file_type(t_info *current, struct stat buf);
 int								get_stat_info(t_info *current, char *f_name,
 								char *path, t_input *input, int first);
@@ -171,13 +175,11 @@ void							get_group_info(t_info *current);
 int								get_sort_info(t_info *current, char *path, int first);
 t_q_link						*create_link(char *str);
 void							push_queue(char *name, t_q_link **head);
-t_q_link						*pop_queue(t_q_link **head);
 t_q_link						*unshift_queue(t_q_link **head);
 int								recurse_me(char *directory, t_input input);
 void							reset_t_info(t_info *current);
-void							fill_dequeue_function(t_input *input);
-void							get_long_info(t_info *current,
-								char *directory_name, t_input *input, int first);
+void							get_long_info(t_info *current, char *directory_name,
+								t_input *input, int first);
 void							get_file_info(t_info *current, t_input *input,
 								char *directory_name, char *filename, int first);
 void							handle_queue(t_q_link **queue,
@@ -185,35 +187,36 @@ void							handle_queue(t_q_link **queue,
 void							print_directory_name(char *directory_name);
 int								filter_directory_queue(t_q_link *n1, t_q_link *n2);
 int								swap_queue_head(t_q_link **head);
-void							sort_queue(t_q_link **head,
-								int (*f)(t_q_link *n1, t_q_link *n2));
 void							free_in_file(t_in_file *head);
 void							init_get_directory(t_f_node **head,
 								t_q_link **queue, t_input *input);
+int								check_edge(char *path, t_input *input, int first);
 void							get_directory(char *directory_name, t_input *input,
 								t_info current, int first);
 void							free_tree(t_f_node *head);
+void							exit_error();
 void							add_flag(t_input *input, char c);
 int								parse_flag(t_input *input, char *str);
 void							overwrite_ls_flags(t_input *input);
 t_in_file						*create_in_file_node(char *path, int is_dir, int pd);
-int								push_input_file(t_in_file **head, char *path,
-								int is_dir, int pd);
+int								push_input_file(t_in_file **head,
+								char *path, int is_dir, int pd);
 int								files_first_alpha(t_in_file *n1, t_in_file *n2);
 void							swap_input_head(t_in_file **head);
+void							swap_input_links(t_in_file *elem, int *complete);
 int								bubble_sort_input(t_in_file **head,
 								int (*f)(t_in_file *n1, t_in_file *n2));
-int								sort_input(t_in_file **head,
-								int (*f)(t_in_file *n1, t_in_file *n2));
+int								sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2));
 void							get_input_info(t_input *input, int argc, char **argv);
-void							assign_traversal_function(t_input *input);
 void							assign_sorting_function(t_input *input);
 void							assign_print_function(t_input *input);
+void							free_queue(t_q_link *queue);
 void							print_single_file(char *path, t_input input);
 void							free_input(t_in_file *file);
-void							free_string_array(char ***array);
+int								dont_print_error(char *str);
+void							print_no_rights_err_str(char *path, int pd);
 void							print_no_rights_err_lst(t_in_file *head);
-void							print_no_rights_err_str(char *directory, int pd);
 void							print_no_exists_err(t_in_file *head);
+void							assign_input_functions(t_input *input);
 void							init_input(t_input *input);
 #endif
