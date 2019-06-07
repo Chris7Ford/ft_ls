@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:24:18 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 17:01:59 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int		main(int argc, char **argv)
 	print_no_exists_err(elem);
 	while (elem)
 	{
-		if (is_directory(elem->path) && !(input.flags & _D) && !(elem->error))
+		if (is_directory_main(elem->path, &input) && !(input.flags & _D) && !(elem->error))
 			get_directory(elem->path, &input, current, result);
 		else if (!(elem->error))
 			print_single_file(elem->path, input);

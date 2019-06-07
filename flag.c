@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:26:23 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:26:36 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 16:53:22 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,13 @@ int		parse_flag(t_input *input, char *str)
 
 void	overwrite_ls_flags(t_input *input)
 {
+	if (input->flags & _U)
+	{
+		if (input->flags & _T)
+			input->flags -= _T;
+		else
+			input->flags -= _U;
+	}
 	if (input->flags & _G)
 		input->flags |= _L;
 	if (input->flags & _F && input->flags & _T)

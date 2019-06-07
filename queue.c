@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:20:08 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:01:19 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 16:44:07 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ void		handle_queue(t_q_link **queue, char *directory_name, t_input *input)
 	c_temp = tmp->directory;
 	tmp->directory = file_to_path(directory_name, tmp->directory);
 	free(c_temp);
-	get_directory(tmp->directory, input, tmp->info, 0);
+	if (!(input->flags & L) || ft_strcmp("/tmp", tmp->directory))
+		get_directory(tmp->directory, input, tmp->info, 0);
 	free(tmp->directory);
 	free(tmp);
 }

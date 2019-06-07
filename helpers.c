@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:10:06 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:00:04 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 17:01:44 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,15 @@ int		is_directory(char *path)
 
 	stat(path, &details);
 	return (S_ISDIR(details.st_mode));
+}
+
+int		is_directory_main(char *path, t_input *input)
+{
+	struct stat	details;
+
+	stat(path, &details);
+	return (S_ISDIR(details.st_mode) &&
+			(!(ft_strcmp(path, "/tmp") || !(input->flags & _L))));
 }
 
 int		recurse_me(char *directory, t_input input)
