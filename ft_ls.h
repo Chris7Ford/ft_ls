@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 17:00:55 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 17:29:02 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ int								sort_length_node(t_f_node *n1, t_info n2);
 int								sort_alpha_node(t_f_node *n1, t_info n2);
 int								sort_directories_first_node(t_f_node *n1,
 								t_info n2);
-int								is_directory_main(char *path, t_input *input);
+int								is_dir_m(char *path, t_input *input);
 int								is_directory(char *path);
 void							check_exists(t_in_file *elem);
 int								sort_nanosec(long nsec1, long nsec2);

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 17:01:59 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 17:28:47 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,28 +27,28 @@ int		sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
 int		main(int argc, char **argv)
 {
 	t_in_file	*elem;
-	t_input		input;
+	t_input		inp;
 	t_info		current;
 	int			result;
 	int			i;
 
-	init_input(&input, &current);
-	get_input_info(&input, argc, argv);
-	assign_input_functions(&input);
+	init_input(&inp, &current);
+	get_input_info(&inp, argc, argv);
+	assign_input_functions(&inp);
 	i = 0;
-	result = sort_input(&(input.directories), files_first_alpha);
-	elem = input.directories;
+	result = sort_input(&(inp.directories), files_first_alpha);
+	elem = inp.directories;
 	print_no_exists_err(elem);
 	while (elem)
 	{
-		if (is_directory_main(elem->path, &input) && !(input.flags & _D) && !(elem->error))
-			get_directory(elem->path, &input, current, result);
+		if (is_dir_m(elem->path, &inp) && !(inp.flags & _D) && !(elem->error))
+			get_directory(elem->path, &inp, current, result);
 		else if (!(elem->error))
-			print_single_file(elem->path, input);
+			print_single_file(elem->path, inp);
 		elem = elem->next;
 	}
-	elem = input.directories;
+	elem = inp.directories;
 	print_no_rights_err_lst(elem);
-	free_input(input.directories);
+	free_input(inp.directories);
 	return (0);
 }

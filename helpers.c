@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:10:06 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 17:08:59 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/06 17:29:19 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int		is_directory(char *path)
 	return (S_ISDIR(details.st_mode));
 }
 
-int		is_directory_main(char *path, t_input *input)
+int		is_dir_m(char *path, t_input *input)
 {
 	struct stat	details;
 
