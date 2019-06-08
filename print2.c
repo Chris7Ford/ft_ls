@@ -6,49 +6,69 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:52:46 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 10:10:33 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
 
-void	print_permission_each(int n)
+void	print_permission_each(int n, int sig, int is_s)
 {
 	if (n & 4)
-		ft_putchar('r');
+		write(1, "r", 1);
 	else
-		ft_putchar('-');
+		write(1, "-", 1);
 	if (n & 2)
-		ft_putchar('w');
+		write(1, "w", 1);
 	else
-		ft_putchar('-');
-	if (n & 1)
-		ft_putchar('x');
+		write(1, "-", 1);
+	if (sig)
+	{
+		if (is_s)
+		{
+			if (n & 1)
+				write(1, "s", 1);
+			else
+				write(1, "S", 1);
+		}
+		else
+		{
+			if (n & 1)
+				write(1, "t", 1);
+			else 
+				write(1, "T", 1);
+		}
+	}
+	else if (n & 1)
+		write(1, "x", 1);
 	else
-		ft_putchar('-');
+		write(1, "-", 1);
 }
 
 void	print_permissions(t_f_node *node)
 {
 	int		copy;
+	int		sig;
 
+	sig = node->permissions % 10;
+	node->permissions /= 10;
 	copy = node->permissions;
-	print_permission_each(node->permissions % 10);
+	print_permission_each(node->permissions % 10, sig & 4, 1);
 	node->permissions /= 10;
-	print_permission_each(node->permissions % 10);
+	print_permission_each(node->permissions % 10, sig & 2, 1);
 	node->permissions /= 10;
-	print_permission_each(node->permissions % 10);
+	print_permission_each(node->permissions % 10, sig & 1, 0);
 }
 
 void	print_file_type(t_f_node *current)
 {
 	if (current->filetype & REG)
-		ft_putchar('-');
+		write(1, "-", 1);
 	else if (current->filetype & DIRECTORY)
-		ft_putchar('d');
+		write(1, "d", 1);
 	else if (current->filetype & SYMLINK)
 	{
-		ft_putchar('l');
+		write(1, "l", 1);
 		current->is_link = 1;
 	}
 	else if (current->filetype & BLOCK_DEVICE)

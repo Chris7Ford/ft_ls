@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 17:29:02 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 10:01:01 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ void							inorder_traversal_apply(t_f_node *elem,
 void							reverse_inorder_traversal_apply(t_f_node *elem,
 								t_input input, t_q_link **queue, char *path);
 void							fill_permissions(t_info *current, int st_mode);
-void							print_permission_each(int n);
+void							print_permission_each(int n, int sig, int is_s);
 void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
 void							print_last_mod(t_f_node *node);

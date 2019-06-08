@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:16:58 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:48:13 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 09:38:52 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,16 @@ void	get_group_info(t_info *current)
 
 void	fill_permissions(t_info *current, int st_mode)
 {
+/*	current->permissions = st_mode & 7;
+	st_mode >>= 3;
+	current->permissions = (current->permissions * 10) + (st_mode & 7);
+	st_mode >>= 3;
+	current->permissions = (current->permissions * 10) + (st_mode & 7);
+	*/
+
 	current->permissions = st_mode & 7;
+	st_mode >>= 3;
+	current->permissions = (current->permissions * 10) + (st_mode & 7);
 	st_mode >>= 3;
 	current->permissions = (current->permissions * 10) + (st_mode & 7);
 	st_mode >>= 3;
