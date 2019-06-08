@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 10:10:33 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:14:32 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,22 +23,7 @@ void	print_permission_each(int n, int sig, int is_s)
 	else
 		write(1, "-", 1);
 	if (sig)
-	{
-		if (is_s)
-		{
-			if (n & 1)
-				write(1, "s", 1);
-			else
-				write(1, "S", 1);
-		}
-		else
-		{
-			if (n & 1)
-				write(1, "t", 1);
-			else 
-				write(1, "T", 1);
-		}
-	}
+		print_permission_special(n, is_s);
 	else if (n & 1)
 		write(1, "x", 1);
 	else
@@ -101,13 +86,22 @@ void	print_last_mod(t_f_node *node)
 	write(1, " ", 1);
 }
 
+void	print_acl(t_f_node *node)
+{
+	if (node->attrib & EXT_AT)
+		write(1, "@", 1);
+	else
+		write(1, " ", 1);
+}
+
 void	print_long_file_info(t_f_node *node, t_input input, char *path)
 {
 	if (input.flags & _A || node->hidden == 0)
 	{
 		print_file_type(node);
 		print_permissions(node);
-		ft_printf("%3d ", node->hlink);
+		print_acl(node);
+		ft_printf("%2d ", node->hlink);
 		if (!(input.flags & _G))
 			ft_printf("%-7s", node->username);
 		ft_printf(" %s", node->groupname);

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 10:01:01 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:14:17 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <unistd.h>
 # include <errno.h>
 # include <stdio.h>
+# include <sys/xattr.h>
 # include "ft_printf.h"
 # include "libft/libft.h"
 
@@ -44,6 +45,8 @@
 # define _D						256
 # define _Y						512
 # define _Z						1024
+# define EXT_AT					1
+# define EXT_PLUS				2
 # define ALPHA					1
 # define LAST_MOD				2
 # define DO_NOT_SORT			4
@@ -59,6 +62,7 @@ struct							s_f_node
 	struct s_f_node				*left;
 	unsigned int				filetype : 7;
 	unsigned int				is_link : 1;
+	unsigned int				attrib : 2;
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
@@ -79,6 +83,7 @@ struct							s_info
 	struct timespec				last_modified;
 	struct timespec				last_accessed;
 	unsigned int				filetype : 7;
+	unsigned int				attrib : 2;
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
@@ -162,6 +167,7 @@ void							inorder_traversal_apply(t_f_node *elem,
 void							reverse_inorder_traversal_apply(t_f_node *elem,
 								t_input input, t_q_link **queue, char *path);
 void							fill_permissions(t_info *current, int st_mode);
+void							print_permission_special(int n, int is_s);
 void							print_permission_each(int n, int sig, int is_s);
 void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
@@ -229,4 +235,6 @@ void							print_no_rights_err_lst(t_in_file *head);
 void							print_no_exists_err(t_in_file *head);
 void							assign_input_functions(t_input *input);
 void							init_input(t_input *input, t_info *current);
+void							get_acl(t_info *current, char *directory_name);
+void							print_acl(t_f_node *node);
 #endif

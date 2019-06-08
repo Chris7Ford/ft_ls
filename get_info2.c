@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:19:17 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:48:41 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:28:37 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,21 @@ void		get_long_info(t_info *current, char *directory_name,
 			t_input *input, int first)
 {
 	get_stat_info(current, directory_name, input, first);
+	get_acl(current, directory_name);
 	get_owner_info(current);
 	get_group_info(current);
+}
+
+void		get_acl(t_info *current, char *directory_name)
+{
+	char	*path;
+	int		xattr;
+
+	path = file_to_path(directory_name, current->f_name);
+	xattr = listxattr(path, 0, 0, XATTR_NOFOLLOW);
+	if (xattr > 0)
+		current->attrib |= EXT_AT;
+	free(path);
 }
 
 void		get_file_info(t_info *current, t_input *input, char *directory_name,

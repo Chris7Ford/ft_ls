@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:12:52 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:13:05 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:12:59 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,24 @@ void	print_link_file(t_f_node *node, char *path)
 		write(1, buffer, ft_strlen(buffer));
 	}
 	free(temp);
+}
+
+void	print_permission_special(int n, int is_s)
+{
+	if (is_s)
+	{
+		if (n & 1)
+			write(1, "s", 1);
+		else
+			write(1, "S", 1);
+	}
+	else
+	{
+		if (n & 1)
+			write(1, "t", 1);
+		else 
+			write(1, "T", 1);
+	}
 }
 
 void	print_filename(t_f_node *node, t_input input, char *path)

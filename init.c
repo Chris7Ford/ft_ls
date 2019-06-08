@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:20:47 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:52:28 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:33:13 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 void	reset_t_info(t_info *current)
 {
 	current->major = 0;
+	current->attrib = 0;
 	current->minor = 0;
 	current->filetype = 0;
 	current->groupname = 0;

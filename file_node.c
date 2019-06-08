@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:14:08 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:11:17 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 11:09:12 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ t_f_node	*create_node(t_info info)
 	node = malloc(sizeof(t_f_node));
 	node->f_name = info.f_name;
 	node->filetype = info.filetype;
+	node->attrib = info.attrib;
 	node->permissions = info.permissions;
 	node->last_modified = info.last_modified;
 	node->last_accessed = info.last_accessed;
