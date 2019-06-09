@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:19:17 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 18:40:54 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 11:03:46 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 void		get_long_info(t_info *current, char *directory_name,
 			t_input *input, int first)
 {
-	if (ends_with_forward_slash(directory_name))
-		get_stat_info(current, directory_name, input, first);
-	else
+//	if (ends_with_forward_slash(directory_name))
+//		get_stat_info(current, directory_name, input, first);
+//	else
 		get_lstat_info(current, directory_name, input, first);
 	get_acl(current, directory_name);
 	get_owner_info(current);
@@ -26,13 +26,28 @@ void		get_long_info(t_info *current, char *directory_name,
 
 void		get_acl(t_info *current, char *directory_name)
 {
-	char	*path;
-	int		xattr;
+	acl_entry_t	dummy;
+	acl_t		acl;
+	char		*path;
+	int			xattr;
 
+	acl = 0;
 	path = file_to_path(directory_name, current->f_name);
+	acl = acl_get_link_np(path, ACL_TYPE_EXTENDED);
+	if (acl && acl_get_entry(acl, ACL_FIRST_ENTRY, &dummy) == -1)
+	{
+        acl_free(acl);
+        acl = NULL;
+    }
 	xattr = listxattr(path, 0, 0, XATTR_NOFOLLOW);
+	if (xattr < 0)
+		xattr = 0;
 	if (xattr > 0)
-		current->attrib |= EXT_AT;
+		current->attrib = '@';
+	else if (acl != 0)
+		current->attrib = '+';
+	else
+		current->attrib = ' ';
 	free(path);
 }
 

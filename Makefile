@@ -6,7 +6,7 @@
 #    By: chford <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/05/09 12:12:47 by chford            #+#    #+#              #
-#    Updated: 2019/06/08 19:37:25 by chford           ###   ########.fr        #
+#    Updated: 2019/06/09 11:07:15 by chford           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,7 +39,7 @@ SRC = directory.c \
 all: $(NAME)
 
 $(NAME):
-	gcc $(FLAGS) $(SRC) $(LIB) -o $(NAME)
+	gcc $(FLAGS) $(SRC) $(LIB) -o $(NAME) -g -fsanitize=address
 clean:
 	/bin/rm -f *.o
 fclean: clean

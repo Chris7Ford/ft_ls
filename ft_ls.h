@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 16:44:52 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 11:16:31 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <errno.h>
 # include <stdio.h>
 # include <sys/xattr.h>
+# include <sys/acl.h>
 # include "ft_printf.h"
 # include "libft/libft.h"
 
@@ -45,8 +46,6 @@
 # define _D						256
 # define _Y						512
 # define _Z						1024
-# define EXT_AT					1
-# define EXT_PLUS				2
 # define ALPHA					1
 # define LAST_MOD				2
 # define DO_NOT_SORT			4
@@ -62,7 +61,6 @@ struct							s_f_node
 	struct s_f_node				*left;
 	unsigned int				filetype : 7;
 	unsigned int				is_link : 1;
-	unsigned int				attrib : 2;
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
@@ -70,6 +68,7 @@ struct							s_f_node
 	char						*username;
 	char						*groupname;
 	char						*f_name;
+	char						attrib;
 	int							permissions;
 	int							hlink;
 	int							error;
@@ -83,7 +82,6 @@ struct							s_info
 	struct timespec				last_modified;
 	struct timespec				last_accessed;
 	unsigned int				filetype : 7;
-	unsigned int				attrib : 2;
 	unsigned int				hidden : 1;
 	unsigned int				major;
 	unsigned int				minor;
@@ -91,6 +89,7 @@ struct							s_info
 	char						*groupname;
 	char						*username;
 	char						*f_name;
+	char						attrib;
 	int							permissions;
 	int							hlink;
 	int							error;
@@ -125,10 +124,11 @@ struct							s_input
 	void						(*for_each_node)(t_f_node *elem, t_input input,
 								t_q_link **queue, char *path);
 	void						(*file_print)(t_f_node *node,
-								t_input input, char *path);
+								t_input input, char *path, int first);
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
+	int							first;
 	int							size;
 };
 
@@ -144,9 +144,9 @@ int								sort_nanosec(long nsec1, long nsec2);
 int								sort_accessed(t_f_node *n1, t_info n2);
 int								sort_modified(t_f_node *n1, t_info n2);
 int								do_not_sort(t_f_node *n1, t_info n2);
-void							print_link_file(t_f_node *node, char *path);
+void							print_link_file(t_f_node *node, char *path, int first);
 void							print_filename(t_f_node *node,
-								t_input input, char *path);
+								t_input input, char *path, int first);
 char							*file_to_path(char *path, char *file);
 t_f_node						*create_node(t_info info);
 void							traverse_nodes_to_get_length(t_f_node *node,
@@ -173,7 +173,7 @@ void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
 void							print_last_mod(t_f_node *node);
 void							print_long_file_info(t_f_node *node,
-								t_input input, char *path);
+								t_input input, char *path, int first);
 void							fill_file_type(t_info *current,
 									struct stat buf);
 int								get_stat_info(t_info *current,
@@ -203,8 +203,7 @@ void							init_get_directory(t_f_node **head,
 								t_q_link **queue, t_input *input);
 int								check_edge(char *path, int first);
 void							get_directory(char *directory_name,
-								t_input *input,
-								t_info current, int first);
+								t_input *input, t_info current);
 void							free_tree(t_f_node *head);
 void							exit_error();
 void							add_flag(t_input *input, char c);
@@ -236,7 +235,6 @@ void							print_no_exists_err(t_in_file *head);
 void							assign_input_functions(t_input *input);
 void							init_input(t_input *input, t_info *current);
 void							get_acl(t_info *current, char *directory_name);
-void							print_acl(t_f_node *node);
 int								get_lstat_info(t_info *current, char *path,
 								t_input *input, int first);
 int								ends_with_forward_slash(char *str);

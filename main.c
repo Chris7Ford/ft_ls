@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 17:28:47 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 11:19:35 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,20 +29,19 @@ int		main(int argc, char **argv)
 	t_in_file	*elem;
 	t_input		inp;
 	t_info		current;
-	int			result;
 	int			i;
 
 	init_input(&inp, &current);
 	get_input_info(&inp, argc, argv);
 	assign_input_functions(&inp);
 	i = 0;
-	result = sort_input(&(inp.directories), files_first_alpha);
+	inp.first = sort_input(&(inp.directories), files_first_alpha);
 	elem = inp.directories;
 	print_no_exists_err(elem);
 	while (elem)
 	{
 		if (is_dir_m(elem->path, &inp) && !(inp.flags & _D) && !(elem->error))
-			get_directory(elem->path, &inp, current, result);
+			get_directory(elem->path, &inp, current);
 		else if (!(elem->error))
 			print_single_file(elem->path, inp);
 		elem = elem->next;
