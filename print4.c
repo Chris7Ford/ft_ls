@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:30:10 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 09:49:23 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 16:28:57 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,15 +80,16 @@ void	print_no_rights_err_lst(t_in_file *head)
 		path_words = ft_strsplit(elem->path, '/');
 		while (path_words[i])
 			i++;
-		if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
+		// ./ft_ls -dl noright ~
+		if ((i >= 1 || ft_strcmp(path_words[i - 1], ".")) && elem->error)
 		{
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
-			if (dont_print_error(path_words[i - 1]) && write(1, "\n", 1))
+			//if (dont_print_error(path_words[i - 1]) && write(1, "\n", 1))
+			if (write(1, "\n", 1) && dont_print_error(path_words[i - 1]))
 				return ;
 			elem->pd ? ft_printf("%s:\n", elem->path) : 0;
-			ft_printf("ft_ls: %s: ", path_words[i - 1]);
-			perror(0);
+			ft_printf("ft_ls: %s: %s\n", path_words[i - 1], strerror(elem->error));
 		}
 		free_string_array(&path_words);
 		elem = elem->next;

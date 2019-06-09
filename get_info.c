@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:16:58 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 10:22:49 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 16:32:04 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,10 @@ int		get_stat_info(t_info *current, char *path,
 	struct stat		buf;
 	char			*temp;
 
-	if (lstat(current->f_name, &buf) == -1 || !first)
+	if (stat(current->f_name, &buf) == -1 || !first)
 	{
 		temp = file_to_path(path, current->f_name);
-		if (lstat(temp, &buf) == -1)
+		if (stat(temp, &buf) == -1)
 			return (0);
 	}
 	if (current->filetype & BLOCK_DEVICE ||

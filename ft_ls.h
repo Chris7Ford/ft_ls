@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 11:14:17 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 16:44:52 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,4 +237,7 @@ void							assign_input_functions(t_input *input);
 void							init_input(t_input *input, t_info *current);
 void							get_acl(t_info *current, char *directory_name);
 void							print_acl(t_f_node *node);
+int								get_lstat_info(t_info *current, char *path,
+								t_input *input, int first);
+int								ends_with_forward_slash(char *str);
 #endif

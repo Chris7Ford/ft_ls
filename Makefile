@@ -6,7 +6,7 @@
 #    By: chford <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/05/09 12:12:47 by chford            #+#    #+#              #
-#    Updated: 2019/06/05 18:41:21 by chford           ###   ########.fr        #
+#    Updated: 2019/06/08 16:45:08 by chford           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRC = directory.c \
 	  get_info.c \
 	  get_info2.c \
 	  helpers.c \
+	  helpers2.c \
 	  init.c \
 	  init2.c \
 	  input.c \
