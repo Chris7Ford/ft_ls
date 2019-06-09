@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:30:10 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 18:28:39 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 20:34:53 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int		print_no_rights_err_str(char *path, int pd)
 	path_words = ft_strsplit(path, '/');
 	while (path_words[i])
 		i++;
-	if ((i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
+	if (path_words[0] && (i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 	{
 		while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 			i--;
@@ -80,12 +80,10 @@ void	print_no_rights_err_lst(t_in_file *head)
 		path_words = ft_strsplit(elem->path, '/');
 		while (path_words[i])
 			i++;
-		// ./ft_ls -dl noright ~
-		if ((i >= 1 || ft_strcmp(path_words[i - 1], ".")) && elem->error)
+		if (path_words[0] && (i >= 1 || ft_strcmp(path_words[i - 1], ".")) && elem->error == 13)
 		{
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
-			//if (dont_print_error(path_words[i - 1]) && write(1, "\n", 1))
 			if (write(1, "\n", 1) && dont_print_error(path_words[i - 1]))
 				return ;
 			elem->pd ? ft_printf("%s:\n", elem->path) : 0;
