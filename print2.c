@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 11:14:32 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/08 19:05:14 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void	print_long_file_info(t_f_node *node, t_input input, char *path)
 		print_file_type(node);
 		print_permissions(node);
 		print_acl(node);
-		ft_printf("%2d ", node->hlink);
+		ft_printf("%3d ", node->hlink);
 		if (!(input.flags & _G))
 			ft_printf("%-7s", node->username);
 		ft_printf(" %s", node->groupname);
