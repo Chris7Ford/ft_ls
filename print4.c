@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:30:10 by chford            #+#    #+#             */
-/*   Updated: 2019/06/10 14:21:21 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 14:54:33 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void	print_single_file(char *path, t_input input)
 		current.f_name = ft_strdup(path);
 		get_sort_info(&current, path);
 		get_lstat_info(&current, current.f_name, &input);
+		get_acl(&current, path);
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
