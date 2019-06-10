@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 11:09:12 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 19:56:32 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,12 +88,15 @@ void	print_last_mod(t_f_node *node)
 
 void	print_long_file_info(t_f_node *node, t_input input, char *path, int first)
 {
+	char	*follow;
+
+	follow = file_to_path(path, node->f_name);
 	if (input.flags & _A || node->hidden == 0)
 	{
 		print_file_type(node);
 		print_permissions(node);
 		write(1, &(node->attrib), 1);
-		ft_printf("%3d ", node->hlink);
+		ft_printf("%2d ", node->hlink);
 		if (!(input.flags & _G))
 			ft_printf("%-7s", node->username);
 		ft_printf(" %s", node->groupname);
@@ -103,8 +106,9 @@ void	print_long_file_info(t_f_node *node, t_input input, char *path, int first)
 			ft_printf(" %d ", node->minor);
 		}
 		else
-			ft_printf("%7d ", node->size);
+			ft_printf("%8d ", node->size);
 		print_last_mod(node);
-		print_filename(node, input, path, first);
+		print_filename(node, input, follow, first);
+		free(follow);
 	}
 }

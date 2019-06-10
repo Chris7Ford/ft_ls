@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:12:52 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 11:28:03 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 19:31:47 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,29 @@
 
 void	print_link_file(t_f_node *node, char *path, int first)
 {
-	char	*temp;
+	//char	*temp;
 	char	buffer[4097];
 	int		free_it;
 	int		count;
 
+	node = 0;
+	first = 0;
 	free_it = 0;
-//	if ((count = readlink(path, buffer, sizeof(buffer))) == 0 || !first)
-	if ((count = readlink(path, buffer, sizeof(buffer))) != 0 || !first)
-	{
-		temp = file_to_path(path, node->f_name);
-		count = readlink(temp, buffer, sizeof(buffer));
-		free_it = 1;
-	}
+//	if ((count = readlink(path, buffer, sizeof(buffer))) != 0 || !first)
+//	{
+//		temp = file_to_path(path, node->f_name);
+//		count = readlink(temp, buffer, sizeof(buffer));
+//		free_it = 1;
+//	}
+	count = readlink(path, buffer, sizeof(buffer));
 	if (count >= 0)
 	{
 		buffer[count] = '\0';
 		write(1, " -> ", 4);
 		write(1, buffer, ft_strlen(buffer));
 	}
-	if (free_it)
-		free(temp);
+//	if (free_it)
+//		free(temp);
 }
 
 void	print_permission_special(int n, int is_s)

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 11:16:31 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 17:39:51 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,8 @@ struct							s_f_node
 	int							permissions;
 	int							hlink;
 	int							error;
-	int							uid;
-	int							gid;
+	long						uid;
+	long						gid;
 };
 
 typedef struct s_info			t_info;
@@ -93,8 +93,8 @@ struct							s_info
 	int							permissions;
 	int							hlink;
 	int							error;
-	int							uid;
-	int							gid;
+	long						uid;
+	long						gid;
 };
 
 typedef struct s_q_link			t_q_link;

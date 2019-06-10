@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:16:58 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 16:32:04 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/09 19:05:34 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ void	get_group_info(t_info *current)
 	struct group	*grp;
 
 	grp = getgrgid(current->gid);
-	current->groupname = ft_strdup(grp->gr_name);
+	if (grp)
+		current->groupname = ft_strdup(grp->gr_name);
 }
 
 void	fill_permissions(t_info *current, int st_mode)
