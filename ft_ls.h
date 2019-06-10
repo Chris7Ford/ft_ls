@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 17:39:51 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 14:25:27 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ struct							s_input
 	void						(*for_each_node)(t_f_node *elem, t_input input,
 								t_q_link **queue, char *path);
 	void						(*file_print)(t_f_node *node,
-								t_input input, char *path, int first);
+								t_input input, char *path);
 	int							(*sort)(t_f_node *n1, t_info n2);
 	int							show_hidden : 1;
 	int							recurse : 1;
@@ -144,9 +144,9 @@ int								sort_nanosec(long nsec1, long nsec2);
 int								sort_accessed(t_f_node *n1, t_info n2);
 int								sort_modified(t_f_node *n1, t_info n2);
 int								do_not_sort(t_f_node *n1, t_info n2);
-void							print_link_file(t_f_node *node, char *path, int first);
+void							print_link_file(char *path);
 void							print_filename(t_f_node *node,
-								t_input input, char *path, int first);
+								t_input input, char *path);
 char							*file_to_path(char *path, char *file);
 t_f_node						*create_node(t_info info);
 void							traverse_nodes_to_get_length(t_f_node *node,
@@ -173,25 +173,23 @@ void							print_permissions(t_f_node *node);
 void							print_file_type(t_f_node *current);
 void							print_last_mod(t_f_node *node);
 void							print_long_file_info(t_f_node *node,
-								t_input input, char *path, int first);
+								t_input input, char *path);
 void							fill_file_type(t_info *current,
 									struct stat buf);
 int								get_stat_info(t_info *current,
 								char *path, t_input *input, int first);
 void							get_owner_info(t_info *current);
 void							get_group_info(t_info *current);
-int								get_sort_info(t_info *current,
-								char *path, int first);
+int								get_sort_info(t_info *current, char *path);
 t_q_link						*create_link(char *str);
 void							push_queue(char *name, t_q_link **head);
 t_q_link						*unshift_queue(t_q_link **head);
 int								recurse_me(char *directory, t_input input);
 void							reset_t_info(t_info *current);
 void							get_long_info(t_info *current,
-								char *directory_name,
-								t_input *input, int first);
+								char *directory_name, t_input *input);
 void							get_file_info(t_info *current, t_input *input,
-								char *directory_name, int first);
+								char *directory_name);
 void							handle_queue(t_q_link **queue,
 								char *directory_name, t_input *input);
 void							print_directory_name(char *directory_name);
@@ -236,6 +234,6 @@ void							assign_input_functions(t_input *input);
 void							init_input(t_input *input, t_info *current);
 void							get_acl(t_info *current, char *directory_name);
 int								get_lstat_info(t_info *current, char *path,
-								t_input *input, int first);
+								t_input *input);
 int								ends_with_forward_slash(char *str);
 #endif

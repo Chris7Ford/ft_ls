@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 19:56:32 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 13:45:00 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,8 @@ void	print_last_mod(t_f_node *node)
 	write(1, " ", 1);
 }
 
-void	print_long_file_info(t_f_node *node, t_input input, char *path, int first)
+void	print_long_file_info(t_f_node *node, t_input input,
+		char *path)
 {
 	char	*follow;
 
@@ -108,7 +109,7 @@ void	print_long_file_info(t_f_node *node, t_input input, char *path, int first)
 		else
 			ft_printf("%8d ", node->size);
 		print_last_mod(node);
-		print_filename(node, input, follow, first);
+		print_filename(node, input, follow);
 		free(follow);
 	}
 }

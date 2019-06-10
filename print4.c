@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:30:10 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 19:24:08 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 14:21:21 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ void	print_single_file(char *path, t_input input)
 		head = 0;
 		queue = 0;
 		current.f_name = ft_strdup(path);
-		get_sort_info(&current, path, 1);
-		get_lstat_info(&current, current.f_name, &input, 1);
+		get_sort_info(&current, path);
+		get_lstat_info(&current, current.f_name, &input);
 		get_owner_info(&current);
 		get_group_info(&current);
 		insert_node(&head, current, input.sort);
@@ -53,7 +53,8 @@ int		print_no_rights_err_str(char *path, int pd)
 	path_words = ft_strsplit(path, '/');
 	while (path_words[i])
 		i++;
-	if (path_words[0] && (i > 1 || ft_strcmp(path_words[i - 1], ".")) && errno == 13)
+	if (path_words[0] && (i > 1 ||
+				ft_strcmp(path_words[i - 1], ".")) && errno == 13)
 	{
 		while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 			i--;
@@ -80,14 +81,16 @@ void	print_no_rights_err_lst(t_in_file *head)
 		path_words = ft_strsplit(elem->path, '/');
 		while (path_words[i])
 			i++;
-		if (path_words[0] && (i >= 1 || ft_strcmp(path_words[i - 1], ".")) && elem->error == 13)
+		if (path_words[0] && (i >= 1 ||
+					ft_strcmp(path_words[i - 1], ".")) && elem->error == 13)
 		{
 			while (i > 1 && ft_strcmp(path_words[i - 1], ".") == 0)
 				i--;
 			if (write(1, "\n", 1) && dont_print_error(path_words[i - 1]))
 				return ;
 			elem->pd ? ft_printf("%s:\n", elem->path) : 0;
-			ft_printf("ft_ls: %s: %s\n", path_words[i - 1], strerror(elem->error));
+			ft_printf("ft_ls: %s: %s\n",
+					path_words[i - 1], strerror(elem->error));
 		}
 		free_string_array(&path_words);
 		elem = elem->next;

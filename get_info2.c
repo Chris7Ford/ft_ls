@@ -6,19 +6,17 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:19:17 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 13:06:05 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 14:27:54 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
 
 void		get_long_info(t_info *current, char *directory_name,
-			t_input *input, int first)
+			t_input *input)
 {
-//	if (ends_with_forward_slash(directory_name))
-//		get_stat_info(current, directory_name, input, first);
-//	else
-		get_lstat_info(current, directory_name, input, first);
+	if (get_lstat_info(current, directory_name, input) == 0)
+		return ;
 	get_acl(current, directory_name);
 	get_owner_info(current);
 	get_group_info(current);
@@ -28,17 +26,15 @@ void		get_acl(t_info *current, char *directory_name)
 {
 	acl_entry_t	dummy;
 	acl_t		acl;
-//	char		*path;
 	int			xattr;
 
 	acl = 0;
-//	path = file_to_path(directory_name, current->f_name);
 	acl = acl_get_link_np(directory_name, ACL_TYPE_EXTENDED);
 	if (acl && acl_get_entry(acl, ACL_FIRST_ENTRY, &dummy) == -1)
 	{
-        acl_free(acl);
-        acl = NULL;
-    }
+		acl_free(acl);
+		acl = NULL;
+	}
 	xattr = listxattr(directory_name, 0, 0, XATTR_NOFOLLOW);
 	if (xattr < 0)
 		xattr = 0;
@@ -48,34 +44,26 @@ void		get_acl(t_info *current, char *directory_name)
 		current->attrib = '+';
 	else
 		current->attrib = ' ';
-//	free(path);
 }
 
-void		get_file_info(t_info *current, t_input *input, char *directory_name,
-			int first)
+void		get_file_info(t_info *current, t_input *input, char *directory_name)
 {
 	char	*path;
 
 	path = file_to_path(directory_name, current->f_name);
 	reset_t_info(current);
-	get_sort_info(current, path, first);
+	get_sort_info(current, path);
 	if (input->flags & _L)
-		get_long_info(current, path, input, first);
+		get_long_info(current, path, input);
 	free(path);
 }
 
-int			get_sort_info(t_info *current, char *path, int first)
+int			get_sort_info(t_info *current, char *path)
 {
 	struct stat		buf;
-//	char			*temp;
-	first = 0;
-//	if (lstat(current->f_name, &buf) == -1 || !first)
-//	{
-//		temp = file_to_path(path, current->f_name);
-//		lstat(temp, &buf);
-//		free(temp);
-//	}
-	lstat(path, &buf);
+
+	if (lstat(path, &buf) != 0)
+		return (0);
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->last_accessed = buf.st_atimespec;
@@ -83,20 +71,13 @@ int			get_sort_info(t_info *current, char *path, int first)
 	return (1);
 }
 
-int		get_lstat_info(t_info *current, char *path,
-		t_input *input, int first)
+int			get_lstat_info(t_info *current, char *path,
+		t_input *input)
 {
 	struct stat		buf;
-//	char			*temp;
 
-//	if (lstat(current->f_name, &buf) == -1 || !first)
-//	{
-//		temp = file_to_path(path, current->f_name);
-//		if (lstat(temp, &buf) == -1)
-//			return (0);
-//	}
-	first = 0;
-	lstat(path, &buf);
+	if (lstat(path, &buf) != 0)
+		return (0);
 	if (current->filetype & BLOCK_DEVICE ||
 			current->filetype & CHARACTER_DEVICE)
 	{

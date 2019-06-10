@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 13:09:22 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 13:17:51 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ int		main(int argc, char **argv)
 	t_info		current;
 	int			i;
 
-	// ./ft_ls -lr ~/goinfre ~/goinfre/
 	init_input(&inp, &current);
 	get_input_info(&inp, argc, argv);
 	assign_input_functions(&inp);

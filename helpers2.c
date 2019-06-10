@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/08 16:37:19 by chford            #+#    #+#             */
-/*   Updated: 2019/06/08 16:46:27 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 13:36:29 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 int		ends_with_forward_slash(char *str)
 {
 	int		i;
+
 	i = ft_strlen(str);
 	return (str[i - 1] == '/');
 }

@@ -6,37 +6,25 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:12:52 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 19:31:47 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 13:43:38 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
 
-void	print_link_file(t_f_node *node, char *path, int first)
+void	print_link_file(char *path)
 {
-	//char	*temp;
 	char	buffer[4097];
-	int		free_it;
 	int		count;
 
-	node = 0;
-	first = 0;
-	free_it = 0;
-//	if ((count = readlink(path, buffer, sizeof(buffer))) != 0 || !first)
-//	{
-//		temp = file_to_path(path, node->f_name);
-//		count = readlink(temp, buffer, sizeof(buffer));
-//		free_it = 1;
-//	}
-	count = readlink(path, buffer, sizeof(buffer));
+	if ((count = readlink(path, buffer, sizeof(buffer)) != 0))
+		return ;
 	if (count >= 0)
 	{
 		buffer[count] = '\0';
 		write(1, " -> ", 4);
 		write(1, buffer, ft_strlen(buffer));
 	}
-//	if (free_it)
-//		free(temp);
 }
 
 void	print_permission_special(int n, int is_s)
@@ -57,13 +45,13 @@ void	print_permission_special(int n, int is_s)
 	}
 }
 
-void	print_filename(t_f_node *node, t_input input, char *path, int first)
+void	print_filename(t_f_node *node, t_input input, char *path)
 {
 	if (input.show_hidden || !(node->hidden))
 	{
 		write(1, node->f_name, ft_strlen(node->f_name));
 		if (node->is_link && input.flags & _L)
-			print_link_file(node, path, first);
+			print_link_file(path);
 		ft_putchar('\n');
 	}
 }

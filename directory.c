@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:25:16 by chford            #+#    #+#             */
-/*   Updated: 2019/06/09 11:18:23 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/10 14:25:52 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	get_directory(char *directory_name,
 	while ((file = readdir(directory)))
 	{
 		current.f_name = ft_strdup(file->d_name);
-		get_file_info(&current, input, directory_name, input->first);
+		get_file_info(&current, input, directory_name);
 		insert_node(&head, current, input->sort);
 	}
 	(void)closedir(directory);
