@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/10 14:25:27 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/14 11:45:07 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,8 @@ t_in_file						*create_in_file_node(char *path,
 int								push_input_file(t_in_file **head,
 								char *path, int is_dir, int pd);
 int								files_first_alpha(t_in_file *n1, t_in_file *n2);
-void							swap_input_head(t_in_file **head);
+void							swap_input_head(t_in_file **head,
+								int *complete);
 void							swap_input_links(t_in_file *elem,
 								int *complete);
 int								bubble_sort_input(t_in_file **head,
@@ -228,7 +229,7 @@ void							print_single_file(char *path, t_input input);
 void							free_input(t_in_file *file);
 int								dont_print_error(char *str);
 int								print_no_rights_err_str(char *path, int pd);
-void							print_no_rights_err_lst(t_in_file *head);
+void							print_no_rights_err_elem(t_in_file *head);
 void							print_no_exists_err(t_in_file *head);
 void							assign_input_functions(t_input *input);
 void							init_input(t_input *input, t_info *current);

@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/30 16:50:29 by chford            #+#    #+#             */
-/*   Updated: 2019/06/10 13:17:51 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/14 11:43:55 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,14 @@
 int		sort_input(t_in_file **head, int (*f)(t_in_file *n1, t_in_file *n2))
 {
 	t_in_file	*elem;
+	int			complete;
 
+	complete = 0;
 	if (*head == 0 || (*head)->next == 0)
 		return (1);
 	elem = *head;
 	if (f(elem, elem->next))
-		swap_input_head(head);
+		swap_input_head(head, &complete);
 	return (bubble_sort_input(head, f));
 }
 
@@ -44,10 +46,11 @@ int		main(int argc, char **argv)
 			get_directory(elem->path, &inp, current);
 		else if (!(elem->error))
 			print_single_file(elem->path, inp);
+		else
+			print_no_rights_err_elem(elem);
 		elem = elem->next;
 	}
 	elem = inp.directories;
-	print_no_rights_err_lst(elem);
 	free_input(inp.directories);
 	return (0);
 }

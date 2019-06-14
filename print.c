@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:12:52 by chford            #+#    #+#             */
-/*   Updated: 2019/06/10 13:43:38 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/11 12:15:44 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,8 @@ void	print_link_file(char *path)
 	char	buffer[4097];
 	int		count;
 
-	if ((count = readlink(path, buffer, sizeof(buffer)) != 0))
-		return ;
-	if (count >= 0)
+	count = readlink(path, buffer, sizeof(buffer));
+	if (count != -1)
 	{
 		buffer[count] = '\0';
 		write(1, " -> ", 4);

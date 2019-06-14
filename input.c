@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:27:30 by chford            #+#    #+#             */
-/*   Updated: 2019/06/06 08:54:55 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/13 19:36:00 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,12 @@ int			push_input_file(t_in_file **head, char *path, int is_dir, int pd)
 	return (1);
 }
 
-void		swap_input_head(t_in_file **head)
+void		swap_input_head(t_in_file **head, int *complete)
 {
 	t_in_file	*elem;
 	t_in_file	*temp;
 
+	*complete = 0;
 	elem = *head;
 	*head = elem->next;
 	temp = (*head)->next;
@@ -85,7 +86,7 @@ int			bubble_sort_input(t_in_file **head,
 	{
 		complete = 1;
 		if (f(*head, (*head)->next))
-			swap_input_head(head);
+			swap_input_head(head, &complete);
 		while (elem->next->next)
 		{
 			if (is_directory(elem->path) || is_directory(elem->next->path))
