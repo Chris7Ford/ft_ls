@@ -6,7 +6,7 @@
 #    By: chford <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/05/09 12:12:47 by chford            #+#    #+#              #
-#    Updated: 2019/06/13 18:21:59 by chford           ###   ########.fr        #
+#    Updated: 2019/06/14 21:26:53 by chford           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ SRC = directory.c \
 	  queue.c \
 	  sort.c \
 	  sort2.c \
+	  sort3.c \
 	  string.c \
 	  traversal.c \
 

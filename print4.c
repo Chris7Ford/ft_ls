@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:30:10 by chford            #+#    #+#             */
-/*   Updated: 2019/06/14 11:44:15 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/14 17:36:00 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void	print_single_file(char *path, t_input input)
 		get_acl(&current, path);
 		get_owner_info(&current);
 		get_group_info(&current);
+		input.show_hidden = 1;
 		insert_node(&head, current, input.sort);
 		input.for_each_node(head, input, &queue, "");
 		free_tree(head);

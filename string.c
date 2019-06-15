@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:13:26 by chford            #+#    #+#             */
-/*   Updated: 2019/06/05 18:13:39 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/14 16:57:52 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,11 @@ char		*file_to_path(char *path, char *file)
 	char	*temp2;
 	int		len;
 
+	if (ft_strcmp(path, "") == 0)
+	{
+		temp = ft_strdup(file);
+		return (temp);
+	}
 	len = ft_strlen(path);
 	if (path[len - 1] != '/')
 	{

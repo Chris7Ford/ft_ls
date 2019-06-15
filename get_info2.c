@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:19:17 by chford            #+#    #+#             */
-/*   Updated: 2019/06/10 14:27:54 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/15 12:33:37 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void		get_acl(t_info *current, char *directory_name)
 		current->attrib = '+';
 	else
 		current->attrib = ' ';
+	acl_free(acl);
 }
 
 void		get_file_info(t_info *current, t_input *input, char *directory_name)
@@ -62,12 +63,12 @@ int			get_sort_info(t_info *current, char *path)
 {
 	struct stat		buf;
 
+	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 	if (lstat(path, &buf) != 0)
 		return (0);
 	fill_file_type(current, buf);
 	current->last_modified = buf.st_mtimespec;
 	current->last_accessed = buf.st_atimespec;
-	current->hidden = current->f_name[0] == '.' ? 1 : 0;
 	return (1);
 }
 

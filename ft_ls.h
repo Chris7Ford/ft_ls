@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/18 19:56:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/14 11:45:07 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/15 13:38:37 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,9 +108,10 @@ struct							s_q_link
 typedef struct s_in_file		t_in_file;
 struct							s_in_file
 {
+	struct timespec				last_modified;
+	unsigned int				is_directory : 1;
 	t_in_file					*next;
 	char						*path;
-	unsigned int				is_directory : 1;
 	int							error;
 	int							pd;
 };
@@ -119,6 +120,7 @@ typedef struct s_input			t_input;
 struct							s_input
 {
 	unsigned int				flags : 11;
+	unsigned int				show_hidden : 1;
 	t_in_file					*directories;
 	t_q_link					*(*dequeue)(t_q_link **head);
 	void						(*for_each_node)(t_f_node *elem, t_input input,
@@ -126,11 +128,12 @@ struct							s_input
 	void						(*file_print)(t_f_node *node,
 								t_input input, char *path);
 	int							(*sort)(t_f_node *n1, t_info n2);
-	int							show_hidden : 1;
 	int							recurse : 1;
 	int							first;
 	int							size;
 };
+
+typedef	int						(*t_in_sort)(t_in_file *n1, t_in_file *n2);
 
 int								sort_alpha(char *str1, char *str2);
 int								sort_length_node(t_f_node *n1, t_info n2);
@@ -219,7 +222,7 @@ void							swap_input_links(t_in_file *elem,
 int								bubble_sort_input(t_in_file **head,
 								int (*f)(t_in_file *n1, t_in_file *n2));
 int								sort_input(t_in_file **head,
-								int (*f)(t_in_file *n1, t_in_file *n2));
+								t_input input);
 void							get_input_info(t_input *input,
 								int argc, char **argv);
 void							assign_sorting_function(t_input *input);
@@ -237,4 +240,15 @@ void							get_acl(t_info *current, char *directory_name);
 int								get_lstat_info(t_info *current, char *path,
 								t_input *input);
 int								ends_with_forward_slash(char *str);
+int								files_first_alpha_rev(t_in_file *n1,
+								t_in_file *n2);
+int								sort_input_time_mod(t_in_file *n1,
+								t_in_file *n2);
+t_in_sort						get_input_file_sort_function(t_input input);
+int								sort_input_time_mod_rev(t_in_file *n1,
+								t_in_file *n2);
+int								check_printable(t_input input,
+								t_f_node *head, char *path);
+void							print_total(t_input input,
+								t_f_node *head, char *path);
 #endif

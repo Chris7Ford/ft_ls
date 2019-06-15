@@ -6,7 +6,7 @@
 /*   By: chford <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/05 18:17:40 by chford            #+#    #+#             */
-/*   Updated: 2019/06/13 18:32:43 by chford           ###   ########.fr       */
+/*   Updated: 2019/06/15 12:39:45 by chford           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,9 @@ void	print_last_mod(t_f_node *node)
 	str = ctime(&current_time);
 	now = time(0);
 	write(1, str + 4, 7);
-	if ((now - current_time) <= SIX_MONTHS)
+	if (((now - current_time) <= SIX_MONTHS) && (now - current_time > 0))
+		write(1, str + 11, 5);
+	else if (((current_time - now) <= SIX_MONTHS) && (current_time - now > 0))
 		write(1, str + 11, 5);
 	else
 	{
@@ -89,10 +91,11 @@ void	print_last_mod(t_f_node *node)
 void	print_long_file_info(t_f_node *node, t_input input,
 		char *path)
 {
-	char	*follow;
+	struct stat		buf;
+	char			*follow;
 
 	follow = file_to_path(path, node->f_name);
-	if (input.flags & _A || node->hidden == 0)
+	if ((input.show_hidden || node->hidden == 0) && lstat(follow, &buf) == 0)
 	{
 		print_file_type(node);
 		print_permissions(node);
@@ -110,6 +113,6 @@ void	print_long_file_info(t_f_node *node, t_input input,
 			ft_printf("%8d ", node->size);
 		print_last_mod(node);
 		print_filename(node, input, follow);
-		free(follow);
 	}
+	free(follow);
 }
